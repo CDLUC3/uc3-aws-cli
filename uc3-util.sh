@@ -9,6 +9,8 @@ check_ssm_root() {
 
 get_ssm_value_by_name() {
   check_ssm_root
-  PATH="${SSM_ROOT_PATH}${1}"
-  `aws ssm get-parameter --name $PATH --region ${REGION} | jq -r '.Parameter' | jq -r '.Value'`
+  P=$1
+  SSMPATH="${SSM_ROOT_PATH}${P}"
+  echo $SSMPATH
+  aws ssm get-parameter --name "${SSMPATH}" --region ${REGION} | jq -r '.Parameter' | jq -r '.Value'
 }
