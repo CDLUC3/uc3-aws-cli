@@ -20,8 +20,6 @@ echo mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser}
 
 get_ssm_json_by_path "${SSM_DB_NAME}/"
 
-echo $SSMJSON
-
 dbname=`get_value_from_ssm_json ${SSM_DB_NAME}/db-name`
 dbhost=`get_value_from_ssm_json ${SSM_DB_NAME}/db-host`
 dbuser=`get_value_from_ssm_json "${SSM_DB_NAME}/${SSM_DB_ROLE:-readonly}/db-user"`
