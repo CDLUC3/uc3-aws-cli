@@ -26,7 +26,7 @@ get_ssm_json_by_path() {
 get_value_from_ssm_json() {
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
-  echo $SSMJSON | jq '.[] ' 
+  echo $SSMJSON | jq '.[] | select(.Name=="${SSMPATH}")' 
   val=`echo $SSMJSON | jq '.[] | select(.Name=="${SSMPATH}")' | jq -r .Value`
   [ $val ] || die "Parameter ${SSMPATH} not found"
   echo $val
