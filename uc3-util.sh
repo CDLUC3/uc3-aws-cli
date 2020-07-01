@@ -22,6 +22,4 @@ get_ssm_values_by_path() {
   SSMPATH="${SSM_ROOT_PATH}${P}"
   val=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION} | jq -r '.Parameters'`
   echo $val
-  [ $val != '' ] || die "Parameter Path ${SSMPATH} not found"
-  echo $val
 }
