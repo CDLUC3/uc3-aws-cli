@@ -13,3 +13,7 @@ dbpass=`get_ssm_value_by_name "${SSM_DB_NAME}/${SSM_DB_ROLE:-readonly}/db-passwo
 export MYSQL_PWD=$dbpass
 
 echo mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser}
+
+json=`get_ssm_values_by_path "${SSM_DB_NAME}/"`
+
+echo $json
