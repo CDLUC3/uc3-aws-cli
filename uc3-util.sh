@@ -21,7 +21,7 @@ get_ssm_json_by_path() {
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
   SSMJSON=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION} | jq -r '.Parameters'`
-  echo ${SSMJSON} | jq '.[]'
+  echo ${SSMJSON} | jq '.[] | select(.Name=="${SSMPATH}")'
 }
 
 get_value_from_ssm_json() {
