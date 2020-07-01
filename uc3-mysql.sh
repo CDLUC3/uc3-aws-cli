@@ -12,4 +12,4 @@ dbpass=`get_ssm_value_by_name "${SSM_DB_NAME}/${SSM_DB_ROLE:-readonly}/db-passwo
 
 export MYSQL_PWD=$dbpass
 
-mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser}
+echo mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser}

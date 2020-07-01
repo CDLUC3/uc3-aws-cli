@@ -15,3 +15,12 @@ get_ssm_value_by_name() {
   [ $val ] || die "Parameter ${SSMPATH} not found"
   echo $val
 }
+
+get_ssm_values_by_path() {
+  check_ssm_root
+  P=$1
+  SSMPATH="${SSM_ROOT_PATH}${P}"
+  val=`aws ssm get-parameter-by-path --recursive --path "${SSMPATH}" --region ${REGION} | jq -r '.Parameters'`
+  [ $val ] || die "Parameter Path ${SSMPATH} not found"
+  echo $val
+}
