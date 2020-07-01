@@ -13,6 +13,6 @@ get_ssm_value_by_name() {
   SSMPATH="${SSM_ROOT_PATH}${P}"
   echo "Retrieving Parameter ${SSMPATH}"
   val=`aws ssm get-parameter --name "${SSMPATH}" --region ${REGION} | jq -r '.Parameter' | jq -r '.Value'`
-  [ $val ] || die "Parameter ${SSM_DB_PATH} not found"
+  [ $val ] || die "Parameter ${SSMPATH} not found"
   echo $val
 }
