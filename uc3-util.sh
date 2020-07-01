@@ -16,10 +16,17 @@ get_ssm_value_by_name() {
   echo $val
 }
 
-get_ssm_values_by_path() {
+get_ssm_json_by_path() {
   check_ssm_root
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
-  val=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION} | jq -r '.Parameters'`
+  SSMJSON=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION} | jq -r '.Parameters'`
+}
+
+get_value_from_ssm_json() {
+  P=$1
+  SSMPATH="${SSM_ROOT_PATH}${P}"
+  val=`echo $SSMJSON | jq '.[] | select(.Name=="${SSMPATH}")' | jq -r .Value`
+  [ $val ] || die "Parameter ${SSMPATH} not found"
   echo $val
 }
