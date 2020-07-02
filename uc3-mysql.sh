@@ -3,7 +3,6 @@
 source uc3-util.sh
 
 check_ssm_root
-[ $SSM_DB_NAME ] || die 'SSM_DB_NAME must be set'
 
 echo " -- Environment Variables --"
 echo "SSM_ROOT_PATH: ${SSM_ROOT_PATH}"
