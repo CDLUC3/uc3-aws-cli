@@ -52,8 +52,6 @@ while (( "$#" )); do
   esac
 done
 
-MYSQLARG="$@"
-
 DB_NAME=${DB_NAME:-${SSM_DB_NAME:-inv}}
 DB_ROLE=${DB_ROLE:-${SSM_DB_ROLE:-readonly}}
 
@@ -70,7 +68,7 @@ then
   echo "DB_NAME:       ${DB_NAME}"
   echo "DB_ROLE:       ${DB_ROLE}"
 
-  echo "MYSQLARG: '${MYSQLARG}'"
+  echo 'MYSQLARG: "$@"'
 fi
 
 # Option 1: get parameters one at a time
@@ -95,4 +93,4 @@ dbpass=`get_value_from_ssm_json "${DB_NAME}/${DB_ROLE}/db-password"`
 
 export MYSQL_PWD=$dbpass
 
-mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser} ${MYSQLARG}
+mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser} "$@"
