@@ -37,12 +37,12 @@ while (( "$#" )); do
       case $count in
         0)
           DB_NAME=$1
-          count=$count+1
+          count=$((count + 1))
           shift
           ;;
         1)
           DB_ROLE=$1
-          count=$count+1
+          count=$((count + 1))
           shift
           ;;
         *)
