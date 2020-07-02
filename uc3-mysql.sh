@@ -20,7 +20,7 @@ then
   echo " -- Overlay command line parameters --"
   echo "DB_NAME:       ${DB_NAME}"
   echo "DB_ROLE:       ${DB_ROLE}"
-end
+fi
 
 # Option 1: get parameters one at a time
 
