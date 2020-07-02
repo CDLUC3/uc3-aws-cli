@@ -11,7 +11,7 @@
 #   - ${SSM_ROOT_PATH}/${SSM_DB_NAME}/${SSM_DB_ROLE}/db-password
 #
 # Usage:
-#   uc3-mysql.sh [db_name] [db_role] [-debug] -- [params to pass to mysql] 
+#   uc3-mysql.sh [db_name] [db_role] [-debug] -- [params to pass to mysql]
 
 source uc3-util.sh
 
@@ -51,9 +51,17 @@ while (( "$#" )); do
       esac
   esac
 done
+
+MYSQLARG=""
+
+while (( "$#" )); do
+  MYSQLARG="${MYSQLARG} \"${1}\""
+  shift
+done
+
 DB_NAME=${DB_NAME:-${SSM_DB_NAME:-inv}}
 DB_ROLE=${DB_ROLE:-${SSM_DB_ROLE:-readonly}}
-MYSQLARG="$@"
+
 
 if $DEBUG
 then
