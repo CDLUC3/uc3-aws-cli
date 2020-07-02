@@ -52,12 +52,7 @@ while (( "$#" )); do
   esac
 done
 
-MYSQLARG=""
-
-while (( "$#" )); do
-  MYSQLARG="${MYSQLARG} \"${1}\""
-  shift
-done
+MYSQLARG="$@"
 
 DB_NAME=${DB_NAME:-${SSM_DB_NAME:-inv}}
 DB_ROLE=${DB_ROLE:-${SSM_DB_ROLE:-readonly}}
@@ -75,7 +70,7 @@ then
   echo "DB_NAME:       ${DB_NAME}"
   echo "DB_ROLE:       ${DB_ROLE}"
 
-  echo "MYSQLARG: $MYSQLARG"
+  echo "MYSQLARG: '${MYSQLARG}'"
 fi
 
 # Option 1: get parameters one at a time
