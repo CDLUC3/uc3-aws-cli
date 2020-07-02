@@ -9,7 +9,7 @@ shift
 DB_ROLE=${1:-${SSM_DB_ROLE:-readonly}}
 shift
 
-if [ false ]
+if [ 0 ]
 then
   echo " -- Environment Variables --"
   echo "SSM_ROOT_PATH: ${SSM_ROOT_PATH}"
