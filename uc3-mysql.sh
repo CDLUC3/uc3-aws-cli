@@ -10,7 +10,9 @@ echo "SSM_DB_NAME:   ${SSM_DB_NAME:-inv}"
 echo "SSM_DB_ROLE:   ${SSM_DB_ROLE:-readonly}"
 
 DB_NAME=${1:-${SSM_DB_NAME:-inv}}
-DB_ROLE=${2:-${SSM_DB_ROLE:-readonly}}
+shift
+DB_ROLE=${1:-${SSM_DB_ROLE:-readonly}}
+shift
 
 echo ""
 echo " -- Overlay command line parameters --"
@@ -39,4 +41,4 @@ dbpass=`get_value_from_ssm_json "${DB_NAME}/${DB_ROLE}/db-password"`
 
 export MYSQL_PWD=$dbpass
 
-mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser}
+mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser} $*
