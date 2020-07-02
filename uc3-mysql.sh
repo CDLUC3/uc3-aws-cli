@@ -1,15 +1,61 @@
 #!/bin/bash
 
+# Pre-requisites
+# - set SSM_ROOT_PATH
+# - set SSM_DB_NAME (opt)
+# - set SSM_DB_ROLE (opt)
+# - create SSM_PARAMETERS
+#   - ${SSM_ROOT_PATH}/${SSM_DB_NAME}/db-host
+#   - ${SSM_ROOT_PATH}/${SSM_DB_NAME}/db-name
+#   - ${SSM_ROOT_PATH}/${SSM_DB_NAME}/${SSM_DB_ROLE}/db-user
+#   - ${SSM_ROOT_PATH}/${SSM_DB_NAME}/${SSM_DB_ROLE}/db-password
+#
+# Usage:
+#   uc3-mysql.sh [db_name] [db_role] [-debug] -- [params to pass to mysql] 
+
 source uc3-util.sh
 
 check_ssm_root
 
-DB_NAME=${1:-${SSM_DB_NAME:-inv}}
-shift
-DB_ROLE=${1:-${SSM_DB_ROLE:-readonly}}
-shift
+DEBUG=false
+DB_NAME=""
+DB_ROLE=""
+count=0
 
-if false
+# see https://medium.com/@Drew_Stokes/bash-argument-parsing-54f3b81a6a8f
+while (( "$#" )); do
+  case "$1" in
+    -debug)
+      DEBUG=true
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *) # preserve positional arguments
+      case $count in
+        0)
+          DB_NAME=$1
+          count=$count+1
+          shift
+          ;;
+        1)
+          DB_ROLE=$1
+          count=$count+1
+          shift
+          ;;
+        *)
+          shift
+          ;;
+      esac
+  esac
+done
+DB_NAME=${DB_NAME:-${SSM_DB_NAME:-inv}}
+DB_ROLE=${DB_ROLE:-${SSM_DB_ROLE:-readonly}}
+MYSQLARG="$@"
+
+if $DEBUG
 then
   echo " -- Environment Variables --"
   echo "SSM_ROOT_PATH: ${SSM_ROOT_PATH}"
@@ -20,6 +66,8 @@ then
   echo " -- Overlay command line parameters --"
   echo "DB_NAME:       ${DB_NAME}"
   echo "DB_ROLE:       ${DB_ROLE}"
+
+  echo "MYSQLARG: $MYSQLARG"
 fi
 
 # Option 1: get parameters one at a time
@@ -44,4 +92,4 @@ dbpass=`get_value_from_ssm_json "${DB_NAME}/${DB_ROLE}/db-password"`
 
 export MYSQL_PWD=$dbpass
 
-mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser} @*
+mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser} ${MYSQLARG}
