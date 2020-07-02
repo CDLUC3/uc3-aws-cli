@@ -4,20 +4,23 @@ source uc3-util.sh
 
 check_ssm_root
 
-echo " -- Environment Variables --"
-echo "SSM_ROOT_PATH: ${SSM_ROOT_PATH}"
-echo "SSM_DB_NAME:   ${SSM_DB_NAME:-inv}"
-echo "SSM_DB_ROLE:   ${SSM_DB_ROLE:-readonly}"
-
 DB_NAME=${1:-${SSM_DB_NAME:-inv}}
 shift
 DB_ROLE=${1:-${SSM_DB_ROLE:-readonly}}
 shift
 
-echo ""
-echo " -- Overlay command line parameters --"
-echo "DB_NAME:       ${DB_NAME}"
-echo "DB_ROLE:       ${DB_ROLE}"
+if [ false ]
+then
+  echo " -- Environment Variables --"
+  echo "SSM_ROOT_PATH: ${SSM_ROOT_PATH}"
+  echo "SSM_DB_NAME:   ${SSM_DB_NAME:-inv}"
+  echo "SSM_DB_ROLE:   ${SSM_DB_ROLE:-readonly}"
+
+  echo ""
+  echo " -- Overlay command line parameters --"
+  echo "DB_NAME:       ${DB_NAME}"
+  echo "DB_ROLE:       ${DB_ROLE}"
+end
 
 # Option 1: get parameters one at a time
 
