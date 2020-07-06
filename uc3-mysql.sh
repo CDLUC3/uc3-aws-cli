@@ -15,6 +15,7 @@
 
 source uc3-util.sh
 
+create_ssm_path_from_tags
 check_ssm_root
 
 DEBUG=false

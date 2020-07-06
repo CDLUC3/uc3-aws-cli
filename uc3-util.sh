@@ -30,3 +30,27 @@ get_value_from_ssm_json() {
   [ $val ] || die "Parameter ${SSMPATH} not found"
   echo $val
 }
+
+get_value_from_tag_json() {
+  P=$1
+  val=`echo ${TAGJSON} | jq ".[] | select(.Key==\"${P}\")" | jq -r .Value`
+  [ $val ] || die "Parameter ${P} not found"
+  echo $val
+}
+
+get_instance() {
+  # Connect to the magic URL that provides EC2 metadata...
+  curl "http://169.254.169.254/latest/meta-data/instance-id"
+}
+
+get_ec2_tags() {
+  aws ec2 describe-tags --region us-west-2 --filters "Name=resource-id,Values=`get_instance`| jq -r '.Tags'"
+}
+
+create_ssm_path_from_tags() {
+  TAGJSON=`get_ec2_tags`
+  PROGRAM=`get_value_from_tag_json Program`
+  SERVICE=`get_value_from_tag_json Service`
+  ENVIRONMENT=`get_value_from_tag_json Environment`
+  SSM_ROOT_PATH="/${PROGRAM}/${SERVICE}/${ENVIRONMENT}/"
+}
