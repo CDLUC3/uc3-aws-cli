@@ -40,7 +40,7 @@ get_value_from_tag_json() {
 
 get_instance() {
   # Connect to the magic URL that provides EC2 metadata...
-  curl "http://169.254.169.254/latest/meta-data/instance-id"
+  curl -s "http://169.254.169.254/latest/meta-data/instance-id"
 }
 
 get_ec2_tags() {
