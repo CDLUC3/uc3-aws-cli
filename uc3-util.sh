@@ -44,7 +44,8 @@ get_instance() {
 }
 
 get_ec2_tags() {
-  aws ec2 describe-tags --region us-west-2 --filters "Name=resource-id,Values=`get_instance`| jq -r '.Tags'"
+  instance=`get_instance`
+  aws ec2 describe-tags --region us-west-2 --filters "Name=resource-id,Values=${instance}| jq -r '.Tags'"
 }
 
 create_ssm_path_from_tags() {
