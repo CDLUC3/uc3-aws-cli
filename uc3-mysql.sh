@@ -30,6 +30,11 @@ while (( "$#" )); do
       DEBUG=true
       shift
       ;;
+    -rp)
+      shift
+      SSM_ROOT_PATH=$1
+      shift
+      ;;
     --)
       shift
       break
