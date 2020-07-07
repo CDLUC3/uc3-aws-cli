@@ -32,10 +32,10 @@ while (( "$#" )); do
       ;;
     -help | --help | -h)
       echo "Usage:"
-      echo "\tuc3-mysql.sh [db_name] [db_role] [-debug] [-rp SSM_ROOT_PATH] -- [params to pass to mysql]"
+      echo "  uc3-mysql.sh [db_name] [db_role] [-debug] [-rp SSM_ROOT_PATH] -- [params to pass to mysql]"
       echo ""
-      DBA_ROOT_PATH=`create_ssm_ops_path_from_tags`
-      echo "\tFor the dba account, use -rp ${DBA_ROOT_PATH}"
+      create_ssm_ops_path_from_tags
+      echo "  For the dba account, use -rp ${OPS_ROOT_PATH}"
       exit
       ;;
     -rp)
