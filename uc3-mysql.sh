@@ -36,6 +36,10 @@ while (( "$#" )); do
       echo ""
       create_ssm_ops_path_from_tags
       echo "  For the dba account, use -rp ${OPS_ROOT_PATH}"
+      echo ""
+      create_ssm_path_from_tags
+      echo "  Current SSM_ROOT_PATH=${SSM_ROOT_PATH}"
+      echo "  Use -rp /${PROGRAM}/${SERVICE}/ENVIRONMENT/" to override value
       exit
       ;;
     -rp)

@@ -61,5 +61,5 @@ create_ssm_ops_path_from_tags() {
   PROGRAM=`get_value_from_tag_json Program`
   SERVICE=`get_value_from_tag_json Service`
   ENVIRONMENT=`get_value_from_tag_json Environment`
-  OPS_ROOT_PATH="/${PROGRAM}/${SERVICE}/${ENVIRONMENT}-ops/"
+  OPS_ROOT_PATH="/${PROGRAM}/${SERVICE}/ENVIRONMENT-ops/"
 }
