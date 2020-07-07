@@ -39,7 +39,7 @@ while (( "$#" )); do
       echo ""
       create_ssm_path_from_tags
       echo "  Current SSM_ROOT_PATH=${SSM_ROOT_PATH}"
-      echo "  Use -rp /${PROGRAM}/${SERVICE}/ENVIRONMENT/" to override value
+      echo "  Use -rp /PROGRAM/SERVICE/ENVIRONMENT/" to override value
       exit
       ;;
     -rp)
