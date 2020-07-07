@@ -30,6 +30,14 @@ while (( "$#" )); do
       DEBUG=true
       shift
       ;;
+    -help | --help | -h)
+      echo "Usage:"
+      echo "\tuc3-mysql.sh [db_name] [db_role] [-debug] [-rp SSM_ROOT_PATH] -- [params to pass to mysql]"
+      echo ""
+      DBA_ROOT_PATH=`create_ssm_ops_path_from_tags`
+      echo "\tFor the dba account, use -rp ${DBA_ROOT_PATH}"
+      exit
+      ;;
     -rp)
       shift
       SSM_ROOT_PATH=$1
