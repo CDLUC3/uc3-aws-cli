@@ -34,8 +34,7 @@ while (( "$#" )); do
       echo "Usage:"
       echo "  uc3-mysql.sh [db_name] [db_role] [-debug] [-rp SSM_ROOT_PATH] -- [params to pass to mysql]"
       echo ""
-      create_ssm_ops_path_from_tags
-      echo "  For the dba account, use -rp ${OPS_ROOT_PATH}"
+      echo "  For the dba account, use -rp /PROGRAM/SERVICE/ENVIRONMENT-ops/"
       echo ""
       create_ssm_path_from_tags
       echo "  Current SSM_ROOT_PATH=${SSM_ROOT_PATH}"
