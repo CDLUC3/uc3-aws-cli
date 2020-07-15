@@ -13,7 +13,7 @@
 # Usage:
 #   uc3-mysql.sh [db_name] [db_role] [-debug] -- [params to pass to mysql]
 
-source uc3-util.sh
+source ~/.profile.d/uc3-aws-util.sh
 
 create_ssm_path_from_tags
 check_ssm_root
