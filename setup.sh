@@ -1,9 +1,9 @@
 #!/bin/bash
 
-[ -d ~/.profile.d ] || mkdir ~/.profile.d
-cp .profile.d/* ~/.profile.d/
-[ -d ~/.aws/cli ] || mkdir -p ~/.aws/cli
-cp .aws/cli/* ~/.aws/cli/
-[ -d ~/bin ] || mkdir -p ~/bin
-cp bin/* ~/bin/
+[ -d ~/.profile.d ] || mkdir -v ~/.profile.d
+cp -v .profile.d/* ~/.profile.d/
+[ -d ~/.aws/cli ] || mkdir -p -v ~/.aws/cli
+cp -v .aws/cli/* ~/.aws/cli/
+[ -d ~/bin ] || mkdir -p -v ~/bin
+cp -v bin/* ~/bin/
 
