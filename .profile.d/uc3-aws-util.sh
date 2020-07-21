@@ -29,7 +29,8 @@ get_ssm_json_by_path() {
   check_ssm_root
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
-  SSMJSON=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION} | jq -r '.Parameters'` || die "Parameter Path ${SSMPATH} not found"
+  SSMJSON_RAW=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION}` || die "Parameter Path ${SSMPATH} not found"
+  SSMJSON=`echo $SSMJSON_RAW | jq -r '.Parameters'` 
 }
 
 get_value_from_ssm_json() {
