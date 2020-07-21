@@ -13,6 +13,7 @@
 # Usage:
 #   uc3-mysql.sh [db_name] [db_role] [-debug] -- [params to pass to mysql]
 
+EXIT_ON_DIE=1
 source ~/.profile.d/uc3-aws-util.sh
 
 create_ssm_path_from_tags

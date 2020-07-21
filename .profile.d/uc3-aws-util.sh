@@ -1,7 +1,13 @@
 #!/bin/bash
 REGION=us-west-2
 
-die() { echo "$*" 1>&2 ; exit 1; }
+die() {
+  echo "$*" 1>&2
+  if [ $EXIT_ON_DIE ]
+  then
+    exit 1
+  fi
+}
 
 check_ssm_root() {
   [ $SSM_ROOT_PATH ] || die 'SSM_ROOT_PATH must be set'
