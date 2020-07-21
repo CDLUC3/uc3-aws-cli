@@ -3,12 +3,10 @@ REGION=us-west-2
 
 die() {
   echo "$*" 1>&2
-  if ($EXIT_ON_DIE)
+  if (${EXIT_ON_DIE:-false})
   then
     echo "  ** Script Exiting **"
     exit 1
-  else
-    echo "  ** Command Failed **"
   fi
 }
 
@@ -30,7 +28,7 @@ get_ssm_json_by_path() {
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
   SSMJSON_RAW=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION}` || die "Parameter Path ${SSMPATH} not found"
-  SSMJSON=`echo $SSMJSON_RAW | jq -r '.Parameters'` 
+  SSMJSON=`echo $SSMJSON_RAW | jq -r '.Parameters'`
 }
 
 get_value_from_ssm_json() {
