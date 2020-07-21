@@ -74,7 +74,7 @@ DB_NAME=${DB_NAME:-${SSM_DB_NAME:-inv}}
 DB_ROLE=${DB_ROLE:-${SSM_DB_ROLE:-readonly}}
 
 
-if $DEBUG
+if [ $DEBUG ]
 then
   echo " -- Environment Variables --"
   echo "SSM_ROOT_PATH: ${SSM_ROOT_PATH}"
