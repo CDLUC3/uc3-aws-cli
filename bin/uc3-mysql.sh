@@ -102,7 +102,7 @@ fi
 
 # Option 2: get parameters in a single API call, save to json variable
 
-get_ssm_json_by_path "${DB_NAME}/" || die 'Cannot read database credentials from SSM'
+get_ssm_json_by_path "${DB_NAME}/" 
 
 dbname=`get_value_from_ssm_json ${DB_NAME}/db-name`
 dbhost=`get_value_from_ssm_json ${DB_NAME}/db-host`
