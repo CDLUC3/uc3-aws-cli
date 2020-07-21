@@ -3,7 +3,7 @@ REGION=us-west-2
 
 die() {
   echo "$*" 1>&2
-  if [ $EXIT_ON_DIE ]
+  if ($EXIT_ON_DIE)
   then
     echo "  ** Script Exiting **"
     exit 1
