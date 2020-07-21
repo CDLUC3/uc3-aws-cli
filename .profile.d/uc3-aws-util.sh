@@ -1,7 +1,14 @@
 #!/bin/bash
 REGION=us-west-2
 
-die() { echo "$*" 1>&2 ; exit 1; }
+die() {
+  echo "$*" 1>&2
+  if (${EXIT_ON_DIE:-false})
+  then
+    echo "  ** Script Exiting **"
+    exit 1
+  fi
+}
 
 check_ssm_root() {
   [ $SSM_ROOT_PATH ] || die 'SSM_ROOT_PATH must be set'
@@ -20,7 +27,8 @@ get_ssm_json_by_path() {
   check_ssm_root
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
-  SSMJSON=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION} | jq -r '.Parameters'`
+  SSMJSON_RAW=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION}` || die "Parameter Path ${SSMPATH} not found"
+  SSMJSON=`echo $SSMJSON_RAW | jq -r '.Parameters'`
 }
 
 get_value_from_ssm_json() {

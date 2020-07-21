@@ -13,6 +13,7 @@
 # Usage:
 #   uc3-mysql.sh [db_name] [db_role] [-debug] -- [params to pass to mysql]
 
+EXIT_ON_DIE=true
 source ~/.profile.d/uc3-aws-util.sh
 
 create_ssm_path_from_tags
@@ -73,7 +74,7 @@ DB_NAME=${DB_NAME:-${SSM_DB_NAME:-inv}}
 DB_ROLE=${DB_ROLE:-${SSM_DB_ROLE:-readonly}}
 
 
-if $DEBUG
+if ($DEBUG)
 then
   echo " -- Environment Variables --"
   echo "SSM_ROOT_PATH: ${SSM_ROOT_PATH}"
@@ -101,7 +102,7 @@ fi
 
 # Option 2: get parameters in a single API call, save to json variable
 
-get_ssm_json_by_path "${DB_NAME}/"
+get_ssm_json_by_path "${DB_NAME}/" 
 
 dbname=`get_value_from_ssm_json ${DB_NAME}/db-name`
 dbhost=`get_value_from_ssm_json ${DB_NAME}/db-host`
