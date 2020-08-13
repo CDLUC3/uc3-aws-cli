@@ -11,6 +11,7 @@ die() {
 }
 
 check_ssm_root() {
+  [ $SSM_ROOT_PATH ] || create_ssm_path_from_tags
   [ $SSM_ROOT_PATH ] || die 'SSM_ROOT_PATH must be set'
 }
 
@@ -60,5 +61,5 @@ create_ssm_path_from_tags() {
   PROGRAM=`get_value_from_tag_json Program`
   SERVICE=`get_value_from_tag_json Service`
   ENVIRONMENT=`get_value_from_tag_json Environment`
-  SSM_ROOT_PATH="/${PROGRAM}/${SERVICE}/${ENVIRONMENT}/"
+  export SSM_ROOT_PATH="/${PROGRAM}/${SERVICE}/${ENVIRONMENT}/"
 }
