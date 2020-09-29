@@ -80,5 +80,24 @@ elb-tg-hosts() {
 }        
 
 
+# Argument is an ALB name
+elb-listener-for-alb() {
+    NAME=$1
+    ARN=$(elb-lb-show-arn $NAME)
+    aws elbv2 describe-listeners --load-balancer-arn $ARN
+} 
 
+elb-listener-for-alb-show-arn() {
+    NAME=$1
+    ARN=$(elb-lb-show-arn $NAME)
+    aws elbv2 describe-listeners --load-balancer-arn $ARN | jq -r '.Listeners[].ListenerArn'
+} 
 
+elb-listener-rules-for-alb() {
+    NAME=$1
+    RULE_ARNS=$(elb-listener-for-alb-show-arn  $NAME)
+    for arn in $RULE_ARNS; do
+        echo "ListenerArn: $arn"
+        aws elbv2 describe-rules --listener-arn $arn
+    done
+}
