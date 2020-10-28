@@ -12,8 +12,3 @@ cp -r merritt-docker-prv/* merritt-docker/mrt-services/no-track
 
 cd merritt-docker
 git submodule update --remote --recursive --init -- .
-
-cd ../merritt-docker/mrt-dependencies
-sudo docker-compose build
-cd ../mrt-services
-sudo docker-compose build
