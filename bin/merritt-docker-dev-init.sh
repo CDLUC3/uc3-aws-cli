@@ -1,5 +1,21 @@
 #! /bin/sh
 
+# Pre-requisites
+#
+# Set the following in .bash_profile
+# (review consistency of .bash_profile and .bashrc)
+#
+# export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+# export PATH=$JAVA_HOME/bin:$HOME/bin:$PATH
+#
+# Install github_rsa and github_rsa.pub for the role account.
+#
+# Install public keys for the team in ~/.ssh/authorized_keys.
+#
+# (1) Connect to the remote host.
+# (2) Open the folder ~/merritt-docker to create the workspace.
+#     This will load the settings in .~/merritt-docker/vscode directory.
+
 cd
 
 rm -rf merritt-docker merritt-docker-prv
