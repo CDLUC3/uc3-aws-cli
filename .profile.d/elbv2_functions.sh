@@ -10,6 +10,12 @@ ec2-instance-name() {
 	jq -r '.Reservations[].Instances[].Tags[] | select(.Key == "Name") | .Value'
 }
 
+ec2-instance-id() {
+    NAME=$1
+    aws ec2 describe-instances --filters "Name=tag:Name,Values=$NAME" | \
+        jq -r '.Reservations[].Instances[].InstanceId'
+}
+
 
 # ELBv2
 
@@ -78,6 +84,37 @@ elb-tg-hosts() {
         echo -e "$hostname\t$id\t$status"
     done
 }        
+
+#aws elbv2 describe-target-group-attributes --target-group-arn $(elb-tg-show-arn uc3-mrtstore-pvt-prd-tg)
+#aws elbv2 modify-target-group-attributes --target-group-arn $(elb-tg-show-arn uc3-dryad-dev-tg) --attributes Key=deregistration_delay.timeout_seconds,Value=30
+
+elb-tg-show-attributes() {
+    TG=$1
+    aws elbv2 describe-target-group-attributes --target-group-arn $(elb-tg-show-arn $TG)
+}
+
+elb-tg-modify-attributes() {
+    TG=$1
+    KEY=$2
+    VALUE=$3
+    aws elbv2 modify-target-group-attributes --target-group-arn $(elb-tg-show-arn $TG) --attributes Key=$KEY,Value=$VALUE
+}
+
+# registering targets
+
+elb-tg-register() {
+    REGION=us-west-2
+    TG=$1
+    TARGET=$2
+    aws elbv2 register-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-id $TARGET)
+}
+
+elb-tg-deregister() {
+    REGION=us-west-2
+    TG=$1
+    TARGET=$2
+    aws elbv2 deregister-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-id $TARGET)
+}
 
 
 # Argument is an ALB name
