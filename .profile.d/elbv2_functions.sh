@@ -79,6 +79,20 @@ elb-tg-hosts() {
     done
 }        
 
+#aws elbv2 describe-target-group-attributes --target-group-arn $(elb-tg-show-arn uc3-mrtstore-pvt-prd-tg)
+#aws elbv2 modify-target-group-attributes --target-group-arn $(elb-tg-show-arn uc3-dryad-dev-tg) --attributes Key=deregistration_delay.timeout_seconds,Value=30
+
+elb-tg-show-attributes() {
+    TG=$1
+    aws elbv2 describe-target-group-attributes --target-group-arn $(elb-tg-show-arn $TG)
+}
+
+elb-tg-modify-attributes() {
+    TG=$1
+    KEY=$2
+    VALUE=$3
+    aws elbv2 modify-target-group-attributes --target-group-arn $(elb-tg-show-arn $TG) --attributes Key=$KEY,Value=$VALUE
+}
 
 # Argument is an ALB name
 elb-listener-for-alb() {
