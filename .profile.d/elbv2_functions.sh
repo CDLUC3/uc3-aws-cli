@@ -10,6 +10,12 @@ ec2-instance-name() {
 	jq -r '.Reservations[].Instances[].Tags[] | select(.Key == "Name") | .Value'
 }
 
+ec2-instance-id() {
+    NAME=$1
+    aws ec2 describe-instances --filters "Name=tag:Name,Values=$NAME" | \
+        jq -r '.Reservations[].Instances[].InstanceId'
+}
+
 
 # ELBv2
 
@@ -93,6 +99,23 @@ elb-tg-modify-attributes() {
     VALUE=$3
     aws elbv2 modify-target-group-attributes --target-group-arn $(elb-tg-show-arn $TG) --attributes Key=$KEY,Value=$VALUE
 }
+
+# registering targets
+
+elb-tg-register() {
+    REGION=us-west-2
+    TG=$1
+    TARGET=$2
+    aws elbv2 register-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-id $TARGET)
+}
+
+elb-tg-deregister() {
+    REGION=us-west-2
+    TG=$1
+    TARGET=$2
+    aws elbv2 deregister-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-id $TARGET)
+}
+
 
 # Argument is an ALB name
 elb-listener-for-alb() {
