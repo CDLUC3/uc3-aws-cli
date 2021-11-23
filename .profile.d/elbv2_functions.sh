@@ -1,4 +1,5 @@
 # Shell functions for quarying elbv2 LoadBalancers and TargetGroups
+REGION=us-west-2
 
 
 
@@ -17,6 +18,13 @@ ec2-instance-id() {
 }
 
 ec2-instance-tags() {
+    NAME=$1
+    INSTANCE_ID=$(ec2-instance-id $NAME)
+    EC2TAGS=$(aws ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
+    echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join("=")'
+}
+
+ec2-metadata-tags() {
     INSTANCE_ID=$(ec2-metadata -i| awk {'print $2}')
     EC2TAGS=$(aws ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
     echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join("=")'
@@ -89,12 +97,8 @@ elb-tg-list-arn() {
        
 elb-tg-show() {
     NAME=$1
-    aws elbv2 describe-target-groups | jq -r ".TargetGroups[] | select(.TargetGroupName == \"$NAME\")"
-}
-       
-elb-tg-show() {
-    NAME=$1
-    aws elbv2 describe-target-groups | jq -r ".TargetGroups[] | select(.TargetGroupName == \"$NAME\")"
+    #aws elbv2 describe-target-groups | jq -r ".TargetGroups[] | select(.TargetGroupName == \"$NAME\")"
+    aws elbv2 describe-target-groups --names $NAME | jq -r ".TargetGroups[]"
 }
 
 elb-tg-show-arn() {
@@ -137,14 +141,12 @@ elb-tg-modify-attributes() {
 # registering targets
 
 elb-tg-register() {
-    REGION=us-west-2
     TG=$1
     TARGET=$2
     aws elbv2 register-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-id $TARGET)
 }
 
 elb-tg-deregister() {
-    REGION=us-west-2
     TG=$1
     TARGET=$2
     aws elbv2 deregister-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-id $TARGET)
@@ -187,37 +189,40 @@ elb-tg-show-tags() {
     aws elbv2 describe-tags --resource-arns $(elb-tg-show-arn $TG) | jq -r '.TagDescriptions[].Tags[]'
 }
 
-# Return targetgroup name for calling ec2 instance
-elb-tg-for-instance() {
+# Return alb and targetgroup names for given ec2 instance name.
+# If no instance name provided, get instance id from local ec2-metadata.
+#
+elb-lb-for-instance() {
+    NAME=$1
+    if [ -n "$NAME" ]; then
+        eval $(ec2-instance-tags $NAME)
+    else
+        eval $(ec2-metadata-tags)
+    fi
+    #echo $Program
+    #echo $Service
+    #echo $Subservice
+    #echo $Environment
 
-    eval $(ec2-instance-tags)
-    echo $Program
-    echo $Service
-    echo $Subservice
-    echo $Environment
-
-    #declare -a TG_TAGS
-    for tg_arn in $(elb-tg-list-arn); do
-        #TG_TAGS=( "${TG_TAGS[@]}" "$(aws elbv2 describe-tags --resource-arns $tg_arn | jq -r '.TagDescriptions[]')" )
-
-        tgtags=$(aws elbv2 describe-tags --resource-arns $tg_arn | jq -r '.TagDescriptions[]')
-        tgprogram=$(echo ${tgtags} | jq -r '.Tags[] | select(.Key=="Program") | .Value')
-        tgservice=$(echo ${tgtags} | jq -r '.Tags[] | select(.Key=="Service") | .Value')
-        tgsubservice=$(echo ${tgtags} | jq -r '.Tags[] | select(.Key=="Subservice") | .Value')
-        tgenvironment=$(echo ${tgtags} | jq -r '.Tags[] | select(.Key=="Environment") | .Value')
-
-        #echo $tg_arn
-        #echo $tgprogram
-        #echo $tgservice
-        #echo $tgsubservice
-        #echo $tgenvironment
-        echo
-        if [ "$Program" == "$tgprogram" ] && [ "$Service" == "$tgservice" ] && [ "$Subservice" == "$tgsubservice" ]  && [ "$myenvironment" == "$tgenvironment" ] ; then
-            echo $tg_arn
+    for lb_arn in $(elb-lb-list-arn); do
+        lb_tags=$(aws elbv2 describe-tags --resource-arns $lb_arn | jq -r '.TagDescriptions[]')
+        lb_program=$(echo ${lb_tags} | jq -r '.Tags[] | select(.Key=="Program") | .Value')
+        lb_service=$(echo ${lb_tags} | jq -r '.Tags[] | select(.Key=="Service") | .Value')
+        lb_subservice=$(echo ${lb_tags} | jq -r '.Tags[] | select(.Key=="Subservice") | .Value')
+        lb_environment=$(echo ${lb_tags} | jq -r '.Tags[] | select(.Key=="Environment") | .Value')
+        #echo $lb_arn
+        #echo $lb_program
+        #echo $lb_service
+        #echo $lb_subservice
+        #echo $lb_environment
+        #echo
+        if [ "$Program" == "$lb_program" ] && [ "$Service" == "$lb_service" ] && [ "$Subservice" == "$lb_subservice" ]  && [ "$Environment" == "$lb_environment" ] ; then
+            #echo Found $lb_arn
+            aws elbv2 describe-load-balancers  --load-balancer-arns $lb_arn | jq -r '.LoadBalancers[].LoadBalancerName'
+            aws elbv2 describe-target-groups  --load-balancer-arn $lb_arn | jq -r '.TargetGroups[].TargetGroupName'
+            break
         fi
-
     done
-
 }
 
 
