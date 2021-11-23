@@ -16,6 +16,11 @@ ec2-instance-id() {
         jq -r '.Reservations[].Instances[].InstanceId'
 }
 
+ec2-instance-tags() {
+    INSTANCE_ID=$(ec2-metadata -i| awk {'print $2}')
+    EC2TAGS=$(aws ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
+    echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join("=")'
+}
 
 # ELBv2
 
@@ -33,6 +38,18 @@ elb-lb-list() {
 
 elb-lb-show() {
     aws elbv2 describe-load-balancers --names $1
+}
+
+elb-lb-list-arn() {
+    response=$(aws elbv2 describe-load-balancers)
+    loadbalancers=$(echo $response | jq -r '.LoadBalancers[]')
+    nextmarker=$(echo $response | jq -r '.NextMarker')
+    while [ ! -n $nextmarker ]; do
+        response=$(aws elbv2 describe-load-balancers --staring-token $nextmarker)
+        loadbalancers=${loadbalancers}$(echo $response | jq -r '.LoadBalancers[]')
+        nextmarker=$(echo $response | jq -r '.NextMarker')
+    done
+    echo $loadbalancers | jq -r '.LoadBalancerArn' | sort
 }
 
 elb-lb-show-arn() {
@@ -55,7 +72,24 @@ elb-tg-list() {
             nextmarker=$(echo $response | jq -r '.NextMarker')
         done
         echo $targetgroups | jq -r '.TargetGroupName' | sort
-        fi
+    fi
+}
+
+elb-tg-list-arn() {
+    response=$(aws elbv2 describe-target-groups)
+    targetgroups=$(echo $response | jq -r '.TargetGroups[]')
+    nextmarker=$(echo $response | jq -r '.NextMarker')
+    while [ ! -n $nextmarker ]; do
+        response=$(aws elbv2 describe-target-groups --staring-token $nextmarker)
+        targetgroups=${targetgroups}$(echo $response | jq -r '.TargetGroups[]')
+        nextmarker=$(echo $response | jq -r '.NextMarker')
+    done
+    echo $targetgroups | jq -r '.TargetGroupArn' | sort
+}
+       
+elb-tg-show() {
+    NAME=$1
+    aws elbv2 describe-target-groups | jq -r ".TargetGroups[] | select(.TargetGroupName == \"$NAME\")"
 }
        
 elb-tg-show() {
@@ -138,3 +172,55 @@ elb-listener-rules-for-alb() {
         aws elbv2 describe-rules --listener-arn $arn
     done
 }
+
+# get tags for elb
+elb-lb-show-tags() {
+    REGION=us-west-2
+    LB=$1
+    aws elbv2 describe-tags --resource-arns $(elb-lb-show-arn $LB) | jq -r '.TagDescriptions[].Tags[]'
+}
+
+# get tags for tg
+elb-tg-show-tags() {
+    REGION=us-west-2
+    TG=$1
+    aws elbv2 describe-tags --resource-arns $(elb-tg-show-arn $TG) | jq -r '.TagDescriptions[].Tags[]'
+}
+
+# Return targetgroup name for calling ec2 instance
+elb-tg-for-instance() {
+
+    eval $(ec2-instance-tags)
+    echo $Program
+    echo $Service
+    echo $Subservice
+    echo $Environment
+
+    #declare -a TG_TAGS
+    for tg_arn in $(elb-tg-list-arn); do
+        #TG_TAGS=( "${TG_TAGS[@]}" "$(aws elbv2 describe-tags --resource-arns $tg_arn | jq -r '.TagDescriptions[]')" )
+
+        tgtags=$(aws elbv2 describe-tags --resource-arns $tg_arn | jq -r '.TagDescriptions[]')
+        tgprogram=$(echo ${tgtags} | jq -r '.Tags[] | select(.Key=="Program") | .Value')
+        tgservice=$(echo ${tgtags} | jq -r '.Tags[] | select(.Key=="Service") | .Value')
+        tgsubservice=$(echo ${tgtags} | jq -r '.Tags[] | select(.Key=="Subservice") | .Value')
+        tgenvironment=$(echo ${tgtags} | jq -r '.Tags[] | select(.Key=="Environment") | .Value')
+
+        #echo $tg_arn
+        #echo $tgprogram
+        #echo $tgservice
+        #echo $tgsubservice
+        #echo $tgenvironment
+        echo
+        if [ "$Program" == "$tgprogram" ] && [ "$Service" == "$tgservice" ] && [ "$Subservice" == "$tgsubservice" ]  && [ "$myenvironment" == "$tgenvironment" ] ; then
+            echo $tg_arn
+        fi
+
+    done
+
+}
+
+
+
+
+#tg_tags=$(for lbarn in $(elb-lb-list-arn); do aws elbv2 describe-tags --resource-arns $lbarn; done)
