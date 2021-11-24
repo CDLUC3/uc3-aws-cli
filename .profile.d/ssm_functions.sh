@@ -32,4 +32,14 @@ ssm-param-delete() {
     aws ssm delete-parameter --name $1
 }
 
-
+# Build SSM search path from local ec2 instance tags
+ssm-path-from-tags() {
+    INSTANCE_ID=$(ec2-metadata -i| awk {'print $2}')
+    EC2TAGS=$(aws ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
+    tag_prog=$(echo ${EC2TAGS} | jq -r '.Tags[] | select(.Key=="Program") | .Value')
+    tag_srvc=$(echo ${EC2TAGS} | jq -r '.Tags[] | select(.Key=="Service") | .Value')
+    tag_subsrvc=$(echo ${EC2TAGS} | jq -r '.Tags[] | select(.Key=="Subservice") | .Value')
+    tag_env=$(echo ${EC2TAGS} | jq -r '.Tags[] | select(.Key=="Environment") | .Value')
+    SSM_PATH="/$tag_prog/$tag_srvc/$tag_subsrvc/$tag_env"
+    echo $SSM_PATH
+}
