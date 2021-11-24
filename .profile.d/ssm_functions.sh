@@ -19,7 +19,7 @@ ssm-param-get-verbose() {
 }
 
 # for values which are URLs run `aws configure set cli_follow_urlparam false`
-# to prevent aws-cli attepting resolve the value from the internet
+# to prevent aws-cli attempting resolve the value from the internet
 ssm-param-put() {
     aws ssm put-parameter --name $1 --value $2 --type String
 }
