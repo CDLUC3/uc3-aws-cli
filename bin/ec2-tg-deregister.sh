@@ -9,8 +9,8 @@
 #   ec2-tg-deregister.sh
 
 # Source awscli shell functions
-[ -f ../.profile.d/ssm_functions.sh ] && . ../.profile.d/ssm_functions.sh
-[ -f ../.profile.d/elbv2_functions.sh ] && . ../.profile.d/elbv2_functions.sh
+[ -f ~/.profile.d/ssm_functions.sh ] && . ~/.profile.d/ssm_functions.sh
+[ -f ~/.profile.d/elbv2_functions.sh ] && . ~/.profile.d/elbv2_functions.sh
 
 # Get TargetGroup name from SSM ParameterStore
 SSM_PATH=$(ssm-path-from-tags)
