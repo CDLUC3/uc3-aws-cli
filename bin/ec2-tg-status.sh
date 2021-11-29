@@ -13,8 +13,13 @@
 [ -f ~/.profile.d/elbv2_functions.sh ] && . ~/.profile.d/elbv2_functions.sh
 
 # Get TargetGroup name from SSM ParameterStore
+set +x
 SSM_PATH=$(ssm-path-from-tags)
 TG_NAME=$(aws ssm get-parameter --name ${SSM_PATH}/target-group-name | jq -r '.Parameter.Value')
+if [ ! -n "$TG_NAME" ]; then
+  echo "SSM parameter ${SSM_PATH}/target-group-name not found"
+  exit 1
+fi
 
 # Report status
 elb-tg-health $TG_NAME
