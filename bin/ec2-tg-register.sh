@@ -15,6 +15,10 @@
 # Get TargetGroup name from SSM ParameterStore
 SSM_PATH=$(ssm-path-from-tags)
 TG_NAME=$(aws ssm get-parameter --name ${SSM_PATH}/target-group-name | jq -r '.Parameter.Value')
+if [ ! -n "$TG_NAME" ]; then
+  echo "SSM parameter ${SSM_PATH}/target-group-name not found"
+  exit 1
+fi
 
 # Run elbv2 command
 INSTANCE_ID=$(ec2-metadata -i | awk '{print $2}')
