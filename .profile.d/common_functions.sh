@@ -53,4 +53,8 @@ EOF
 aws-cli-is-v2() {
     aws --version | egrep "^aws-cli\/2.*?" 2>&1 >/dev/null
 }
+
+aws-version() {
+    aws --version | awk '{print $1}' | awk -F / '{print $2}'
+}
     
