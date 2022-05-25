@@ -52,7 +52,8 @@ iam-role-list-attached-policy-arn() {
 
 iam-role-show-attached-policies() {
     for POLICYARN in $(iam-role-list-attached-policy-arn $1); do
-        aws iam get-policy --policy-arn $POLICYARN | jq -r '.Policy'
+	iam-policy-show $POLICYARN
+	echo
     done
 }
 
@@ -62,5 +63,28 @@ iam-role-show-policies() {
     echo
     echo Attached Policies:
     iam-role-show-attached-policies $1
+}
+
+iam-policy-list() {
+    aws iam list-policies | jq -r '.Policies[].PolicyName' | sort
+}
+
+iam-policy-show-arn() {
+    NAME=$1
+    aws iam list-policies | jq -r ".Policies[] | select(.PolicyName == \"$NAME\") | .Arn"
+}
+
+iam-policy-show() {
+    if $(echo $1 | egrep ^arn.* 2>&1 > /dev/null); then
+	ARN=$1
+    else
+        ARN=$(iam-policy-show-arn $1)
+    fi
+    OUTPUT=$(aws iam get-policy --policy-arn $ARN)
+    VERSION=$(echo $OUTPUT | jq -r '.Policy.DefaultVersionId')
+    echo $OUTPUT | \
+	    jq -r '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
+    aws iam get-policy-version --policy-arn $ARN --version-id $VERSION | \
+	    jq -r '.PolicyVersion'
 }
 
