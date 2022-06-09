@@ -14,10 +14,23 @@ route53-hz-show-id() {
 
 route53-hz-show() {
     HOSTED_ZONE_ID=$(route53-hz-show-id $1)
-    aws route53 get-hosted-zone --id $HOSTED_ZONE_ID | jq -r
+    #aws route53 get-hosted-zone --id $HOSTED_ZONE_ID | jq -r
+    aws --no-cli-pager --output yaml route53 get-hosted-zone --id $HOSTED_ZONE_ID
 }
 
-route53-recordset-list() {
+route53-hz-show-recordsets() {
     HOSTED_ZONE_ID=$(route53-hz-show-id $1)
-    aws route53 list-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID | jq -r
+    #aws route53 list-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID | jq -r
+    aws --no-cli-pager --output yaml route53 list-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID
 }
+
+#route53-recordset-show() {
+#
+#}
+
+
+#route53-recordset-delete() {
+#}
+
+
+

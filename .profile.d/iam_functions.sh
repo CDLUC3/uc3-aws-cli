@@ -42,7 +42,8 @@ iam-role-list-inline-policies() {
 
 iam-role-show-inline-policies() {
     for POLICYNAME in $(iam-role-list-inline-policies $1); do
-        aws iam get-role-policy --role-name $1 --policy-name $POLICYNAME | jq -r
+        #aws iam get-role-policy --role-name $1 --policy-name $POLICYNAME | jq -r
+        aws --no-cli-pager --output yaml iam get-role-policy --role-name $1 --policy-name $POLICYNAME
     done
 }
 
@@ -84,7 +85,7 @@ iam-policy-show() {
     VERSION=$(echo $OUTPUT | jq -r '.Policy.DefaultVersionId')
     echo $OUTPUT | \
 	    jq -r '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
-    aws iam get-policy-version --policy-arn $ARN --version-id $VERSION | \
-	    jq -r '.PolicyVersion'
+    #aws iam get-policy-version --policy-arn $ARN --version-id $VERSION | jq -r '.PolicyVersion'
+    aws --no-cli-pager --output yaml iam get-policy-version --policy-arn $ARN --version-id $VERSION
 }
 
