@@ -44,9 +44,13 @@ cfn-stack-drift() {
 
 # These will effect change
 #
-cfn-stack-cancel-update() {
-    aws cloudformation cancel-update-stack --stack-name $1
-}
+#cfn-stack-update() {
+#    aws cloudformation update-stack --stack-name $1 --template-body file://$2
+#}
+#
+#cfn-stack-cancel-update() {
+#    aws cloudformation cancel-update-stack --stack-name $1
+#}
 
 cfn-stack-delete() {
    aws cloudformation delete-stack --stack-name $1
