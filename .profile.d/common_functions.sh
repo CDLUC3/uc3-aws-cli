@@ -11,6 +11,9 @@ aws-whoami() {
   fi
 }
 
+aws-account-id() {
+  aws sts get-caller-identity | jq -r '.Account'
+}
 
 aws-region ()
 {
