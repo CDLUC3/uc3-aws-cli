@@ -60,6 +60,16 @@ ec2-snapshots-create-for-instance() {
 
 
 
+# subnets
+ec2-subnet-list() {
+  aws ec2 describe-subnets | jq -r '.Subnets[] | (select(.Tags != null) | .Tags[] | select(.Key == "Name") | .Value)'
+}
+
+ec2-subnet-show() {
+ NAME=$1
+ aws --no-cli-pager --output yaml ec2 describe-subnets  --filters "Name=tag:Name,Values=$NAME"
+}
+
 
 # Notes
 
