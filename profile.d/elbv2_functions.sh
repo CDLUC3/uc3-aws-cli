@@ -70,6 +70,12 @@ elb-lb-show-tags() {
     aws elbv2 describe-tags --resource-arns $(elb-lb-show-arn $LB) | jq -r '.TagDescriptions[].Tags[]'
 }
 
+elb-lb-show-attributes() {
+    REGION=us-west-2
+    LB=$1
+    aws elbv2 describe-load-balancer-attributes --load-balancer-arn $(elb-lb-show-arn $LB) | jq -r '.Attributes[]'
+}
+
 # Return ALB and TargetGroup names for given ec2 instance name.
 # If no instance name provided, get instance id from local ec2-metadata.
 #

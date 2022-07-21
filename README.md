@@ -20,7 +20,6 @@ After cloning the repository, run the setup.sh script.
 This script creates and installs to the following directories:
 
     ~/bin
-    ~/.aws/cli
     ~/.profile.d
 
 In order to source the aws shell functions,  Add the following to your ~/.bashrc:
@@ -35,6 +34,7 @@ For this tools set to work properly after installation, you must install
 the following RPMs:
 
 - jq
+- python3-yq (optional - SuSE only)
 
 
 ## Installation Via Puppet
