@@ -110,5 +110,10 @@ dbuser=`get_value_from_ssm_json "${DB_NAME}/${DB_ROLE}/db-user"`
 dbpass=`get_value_from_ssm_json "${DB_NAME}/${DB_ROLE}/db-password"`
 
 export MYSQL_PWD=$dbpass
+if ($DEBUG)
+then
+  echo export MYSQL_PWD=xxxxx
+  echo mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser} "$@"
+fi
 
 mysql --host=${dbhost} --port=3306 --database=${dbname} --user=${dbuser} "$@"
