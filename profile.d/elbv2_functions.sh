@@ -16,19 +16,6 @@ ec2-instance-id() {
         jq -r '.Reservations[].Instances[].InstanceId'
 }
 
-ec2-instance-tags() {
-    NAME=$1
-    INSTANCE_ID=$(ec2-instance-id $NAME)
-    EC2TAGS=$(aws ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
-    echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join("=")'
-}
-
-ec2-metadata-tags() {
-    INSTANCE_ID=$(ec2-metadata -i| awk {'print $2}')
-    EC2TAGS=$(aws ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
-    echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join("=")'
-}
-
 
 # ELBv2 ALBs
 
@@ -82,19 +69,19 @@ elb-lb-show-attributes() {
 elb-lb-list-for-instance() {
     NAME=$1
     if [ -n "$NAME" ]; then
-        eval $(ec2-instance-tags $NAME)
+        eval $(ec2-instance-show-tags $NAME)
     else
-        eval $(ec2-metadata-tags)
+        eval $(ec2-metadata-show-tags)
     fi
 
     for lb_arn in $(elb-lb-list-arn); do
-        lb_tags=$(aws elbv2 describe-tags --resource-arns $lb_arn | jq -r '.TagDescriptions[]')
+        lb_tags=$($AWSBIN --output json elbv2 describe-tags --resource-arns $lb_arn | jq -r '.TagDescriptions[]')
         lb_program=$(echo ${lb_tags} | jq -r '.Tags[] | select(.Key=="Program") | .Value')
         lb_service=$(echo ${lb_tags} | jq -r '.Tags[] | select(.Key=="Service") | .Value')
         lb_subservice=$(echo ${lb_tags} | jq -r '.Tags[] | select(.Key=="Subservice") | .Value')
         lb_environment=$(echo ${lb_tags} | jq -r '.Tags[] | select(.Key=="Environment") | .Value')
         if [ "$Program" == "$lb_program" ] && [ "$Service" == "$lb_service" ] && [ "$Subservice" == "$lb_subservice" ]  && [ "$Environment" == "$lb_environment" ] ; then
-            aws elbv2 describe-load-balancers  --load-balancer-arns $lb_arn | jq -r '.LoadBalancers[].LoadBalancerName'
+            $AWSBIN --output json elbv2 describe-load-balancers  --load-balancer-arns $lb_arn | jq -r '.LoadBalancers[].LoadBalancerName'
             aws elbv2 describe-target-groups  --load-balancer-arn $lb_arn | jq -r '.TargetGroups[].TargetGroupName'
             break
         fi
@@ -187,7 +174,7 @@ elb-tg-modify-attributes() {
 elb-tg-register() {
     TG=$1
     TARGET=$2
-    aws elbv2 register-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-id $TARGET)
+    aws elbv2 register-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-show-id $TARGET)
 }
 
 elb-tg-deregister() {

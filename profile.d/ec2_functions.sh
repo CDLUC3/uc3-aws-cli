@@ -34,9 +34,43 @@ ec2-instance-show-id() {
 }
 
 ec2-instance-show-tags() {
-    NAME=$1
-    $AWSBIN ec2 describe-instances --filters "Name=tag:Name,Values=$NAME" | \
-	yq -ry '.Reservations[].Instances[].Tags[]'
+    helpmsg() {
+        cat << EOF
+Print AWS resource tags for the named EC2 instance.
+If no instance name provided, get instance id from local ec2-metadata.
+
+Args:
+  -h: display help message
+  <instance_name>: name of an EC2 instance in this AWS account
+
+EOF
+    }
+
+    usage() {
+        echo "Usage: ec2-instance-show-tags [-h | <instance_name>]"
+	return
+    }
+
+    if [ $# -gt 0 ]; then
+        case $1 in
+            '-h' )
+	        helpmsg
+	        usage
+		;;
+            * ) 
+		NAME=$1
+                INSTANCE_ID=$(ec2-instance-show-id $NAME)
+                ;;
+        esac
+    elif $(which ec2-metadata > /dev/null 2>&1); then
+        INSTANCE_ID=$(ec2-metadata -i| awk '{print $2}')
+    else 
+	echo "Cant determine instance id of localhost.  Is this a ec2 instance?"
+	usage
+    fi
+
+    EC2TAGS=$($AWSBIN --output json ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
+    echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join("=")'
 }
 
 ec2-instance-show-volumes() {
