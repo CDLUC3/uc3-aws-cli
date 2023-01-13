@@ -1,41 +1,45 @@
 #!/usr/bin/env bash
 
 
+cloud9-env-show-all() {
+    $AWSBIN cloud9 describe-environments --cli-input-yaml "$($AWSBIN cloud9 list-environments)" 
+}
+
 cloud9-env-list() {
-    aws cloud9 describe-environments --cli-input-json "$(aws --no-cli-pager cloud9 list-environments)" | jq -r '.environments[].name'
+    cloud9-env-show-all | yq -r '.environments[].name'
 }
 
 cloud9-env-show() {
     ENV_NAME=$1
-    aws cloud9 describe-environments --cli-input-json "$(aws --no-cli-pager cloud9 list-environments)" | jq -r ".environments[] | select(.name == \"$ENV_NAME\") | ."
+    cloud9-env-show-all | yq -ry ".environments[] | select(.name == \"$ENV_NAME\") | ."
 }
 
 cloud9-env-show-id() {
     ENV_NAME=$1
-    aws cloud9 describe-environments --cli-input-json "$(aws --no-cli-pager cloud9 list-environments)" | jq -r ".environments[] | select(.name == \"$ENV_NAME\") | .id"
+    cloud9-env-show-all | yq -r ".environments[] | select(.name == \"$ENV_NAME\") | .id"
 }
 
 cloud9-env-show-memberships() {
     ENV_NAME=$1
-    aws --no-cli-pager --output yaml cloud9 describe-environment-memberships --environment-id $(cloud9-env-show-id $ENV_NAME)
+    $AWSBIN cloud9 describe-environment-memberships --environment-id $(cloud9-env-show-id $ENV_NAME)
 }
 
 cloud9-env-add-membership() {
     ENV_NAME=$1
     USER_ARN=$2
     PERMS=$3
-    aws --no-cli-pager --output yaml cloud9 create-environment-membership --environment-id $(cloud9-env-show-id $ENV_NAME) --user-arn $USER_ARN --permissions $PERMS
+    $AWSBIN cloud9 create-environment-membership --environment-id $(cloud9-env-show-id $ENV_NAME) --user-arn $USER_ARN --permissions $PERMS
 }
 
 cloud9-env-remove-membership() {
     ENV_NAME=$1
     USER_ARN=$2
-    aws --no-cli-pager --output yaml cloud9 delete-environment-membership --environment-id $(cloud9-env-show-id $ENV_NAME) --user-arn $USER_ARN
+    $AWSBIN cloud9 delete-environment-membership --environment-id $(cloud9-env-show-id $ENV_NAME) --user-arn $USER_ARN
 }
 
 cloud9-env-delete() {
     ENV_NAME=$1
-    aws cloud9 delete-environment --environment-id $(cloud9-env-show-id $ENV_NAME)
+    $AWSBIN cloud9 delete-environment --environment-id $(cloud9-env-show-id $ENV_NAME)
 }
 
 
