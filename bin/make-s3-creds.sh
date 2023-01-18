@@ -22,7 +22,7 @@ aws_access_key_id = ${AK_WAS}
 aws_secret_access_key = ${SK_WAS}
 HERE
 
-chmod 400 ~/.aws/credentials
+chmod 600 ~/.aws/credentials
 
 cat << HERE
 
@@ -49,3 +49,4 @@ aws s3 ls dryad-assetstore-merritt-east/
 
 aws s3 ls cdl.sdsc.prod/ --profile sdsc --endpoint https://cdl.s3.sdsc.edu:443
 aws s3 ls uc3-wasabi-useast-2.prod/ --profile wasabi --endpoint https://s3.us-east-2.wasabisys.com:443
+HERE
