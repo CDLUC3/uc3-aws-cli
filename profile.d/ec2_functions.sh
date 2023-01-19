@@ -33,6 +33,13 @@ ec2-instance-show-id() {
 	yq -r '.Reservations[].Instances[].InstanceId'
 }
 
+ec2-instance-show-name-from-id() {
+    ID=$1
+    #$AWSBIN ec2 describe-instances --instance-ids $ID | \
+    aws ec2 describe-instances --instance-ids $ID | \
+	yq -r '.Reservations[].Instances[].Tags[] | select(.Key == "Name") | .Value'
+}
+
 ec2-instance-show-tags() {
     helpmsg() {
         cat << EOF
