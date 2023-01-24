@@ -55,15 +55,19 @@ route53-hz-show() {
 
 route53-hz-show-public() {
     HOSTED_ZONE_ID=$(route53-hz-show-id-public $1)
-    aws route53 get-hosted-zone --id $HOSTED_ZONE_ID | jq -r
+    if [ -n "$HOSTED_ZONE_ID" ]; then
+        aws route53 get-hosted-zone --id $HOSTED_ZONE_ID | jq -r
+    fi
 }
 
 route53-hz-show-private() {
     HOSTED_ZONE_ID=$(route53-hz-show-id-private $1)
-    aws route53 get-hosted-zone --id $HOSTED_ZONE_ID | jq -r
+    if [ -n "$HOSTED_ZONE_ID" ]; then
+        aws route53 get-hosted-zone --id $HOSTED_ZONE_ID | jq -r
+    fi
 }
 
-route53-hz-list-recordsets() {
+route53-recordset-list() {
     ZONE_IDS=$(route53-hz-show-id $1)
     PUBLIC_ID=$(echo $ZONE_IDS | jq -r '.[] | select(.PrivateZone == false) | .Id' | awk -F'/' '{print $3}')
     PRIVATE_ID=$(echo $ZONE_IDS | jq -r '.[] | select(.PrivateZone == true) | .Id' | awk -F'/' '{print $3}')    
@@ -78,13 +82,13 @@ route53-hz-list-recordsets() {
     fi
 }
 
-route53-hz-show-public-recordsets() {
+route53-recordset-list-public() {
     HOSTED_ZONE_ID=$(route53-hz-show-id-public $1)
     aws route53 list-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID
     #aws route53 list-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID | jq -r '.ResourceRecordSets[]'
 }
 
-route53-hz-show-private-recordsets() {
+route53-recordset-list-private() {
     HOSTED_ZONE_ID=$(route53-hz-show-id-private $1)
     aws route53 list-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID
     #aws route53 list-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID | jq -r
@@ -92,6 +96,10 @@ route53-hz-show-private-recordsets() {
 
 
 route53-recordset-show() {
+    if [ $# -ne 2 ]; then
+        echo "Usage: route53-recordset-show <domain_name> <host_name>"
+        return
+    fi
     DOMAIN_NAME=${1%%.}.
     HOST_NAME=${2%%.}.
     FQDN=${HOST_NAME%%$DOMAIN_NAME}$DOMAIN_NAME
@@ -112,6 +120,10 @@ route53-recordset-show() {
 
 
 route53-recordset-show-cname() {
+    if [ $# -ne 2 ]; then
+        echo "Usage: route53-recordset-show-cname <domain_name> <cname_target>"
+        return
+    fi
     DOMAIN_NAME=${1%%.}.
     TARGET=$2
     ZONE_IDS=$(route53-hz-show-id $DOMAIN_NAME)
@@ -130,6 +142,10 @@ route53-recordset-show-cname() {
 
 
 route53-recordset-show-alias() {
+    if [ $# -ne 2 ]; then
+        echo "Usage: route53-recordset-show-alias <domain_name> <alias_target>"
+        return
+    fi
     DOMAIN_NAME=${1%%.}.
     TARGET=$2
     ZONE_IDS=$(route53-hz-show-id $DOMAIN_NAME)
