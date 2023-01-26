@@ -107,7 +107,7 @@ waf-webacl-show-rule-samples() {
         START2=`date -u -d "@$START" '+%Y-%m-%dT%H:%MZ'`
         NOW=`date -u '+%Y-%m-%dT%H:%MZ'`
         WEBACL_ARN=$(waf-webacl-show-arn $WEBACL_NAME)
-        WEBACL_RULES=$(waf-webacl-show-rules $WEBACL_NAME)
+        WEBACL_RULES=$(waf-webacl-list-rules $WEBACL_NAME)
         for rule in $WEBACL_RULES; do
             echo $rule
             aws wafv2 get-sampled-requests \
@@ -123,7 +123,9 @@ waf-webacl-show-rule-samples() {
 
 
 
-
+##############################################################
+## Notes
+#
 #
 #SEC=$((${1:-180} * 60))
 #START=$((`date '+%s'` - $SEC ))
