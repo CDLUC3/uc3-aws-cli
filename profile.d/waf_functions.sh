@@ -120,6 +120,21 @@ waf-webacl-show-rule-samples() {
     fi
 }
 
+waf-resources-for-webacl() {
+    WEBACL_NAME=$1
+    SCOPE=$(waf-webacl-show-scope $WEBACL_NAME)
+    if [ -n "$SCOPE" ]; then
+        if [ "$SCOPE" == "REGIONAL" ]; then
+            WEBACL_ARN=$(waf-webacl-show-arn $WEBACL_NAME)
+            aws wafv2 list-resources-for-web-acl --web-acl-arn $WEBACL_ARN | jq -r '.ResourceArns[]'
+        else
+            WEBACL_ID=$(waf-webacl-show-id $WEBACL_NAME)
+            aws cloudfront list-distributions-by-web-acl-id --web-acl-id $WEBACL_ID
+        fi
+    fi
+}
+        
+
 
 
 
