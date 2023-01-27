@@ -7,6 +7,7 @@ Utility scripts for accessing AWS Client resources from UC3 servers.
   - SSM_DB_NAME (for servers with mysql)
   - SSM_DB_ROLE (defaults to readonly)
 - jq installed on the machine
+- yq installed in python vertual environment
 - ssm get-parameters-by-path access
 
 
@@ -30,11 +31,29 @@ In order to source the aws shell functions,  Add the following to your ~/.bashrc
 
 ## Installation Prerequisites
 
-For this tools set to work properly after installation, you must install
-the following RPMs:
+Many of the aws cli shell functions under `profile.d` require json and yaml
+manipulation tools.
 
-- jq
-- python3-yq (optional - SuSE only)
+#### Installing `jq`
+
+Install `jq` with yum:
+```
+sudo yum install jq
+```
+
+#### Installing `yq`
+
+Install `yq` as a pip package.  This must be done within a python virtual environment.
+See pyenv section below for info on setting up python virutal environments.
+```
+agould@uc3-aws2-ops:~> pyenv versions
+* system (set by /home/agould/.pyenv/version)
+  2.7.18
+  3.9.16
+agould@uc3-aws2-ops:~> pyenv global 2.7.18
+agould@uc3-aws2-ops:~> pip install yq
+```
+
 
 
 ## Installation Via Puppet
@@ -66,3 +85,26 @@ of this repo and then edit the `uc3_awscli::awscli::revision` attribute:
     -                           $revision = "0.0.0"
     +                           $revision = "0.0.1"
 
+
+## Installing Python Virtual Environment
+
+Use `pyenv` tool to manage python virtual environments.  This must be installed into
+your home directy.  See more info at: https://github.com/pyenv/pyenv
+
+The simple recipe:
+```
+curl https://pyenv.run | bash
+cat << \EOF >> ~/.bashrc
+
+# pyenv stuff
+#
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+EOF
+
+. ~/.bashrc
+pyenv install 2.7.18
+pyenv versions
+pyenv global 2.7.18
+```
