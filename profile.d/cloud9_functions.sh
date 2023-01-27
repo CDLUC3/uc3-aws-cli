@@ -2,7 +2,7 @@
 
 
 cloud9-env-show-all() {
-    $AWSBIN cloud9 describe-environments --cli-input-yaml "$($AWSBIN cloud9 list-environments)" 
+    $AWSBIN cloud9 describe-environments --cli-input-json "$($AWSBIN cloud9 list-environments --output json)" 
 }
 
 cloud9-env-list() {
@@ -26,10 +26,12 @@ cloud9-env-show-memberships() {
 
 cloud9-env-add-membership() {
     ENV_NAME=$1
-    USER_ARN=$2
-    PERMS=$3
+    USER_ARN=$2 # full sso federated user arn
+    PERMS=$3	# either 'read-only' or 'read-write'
     $AWSBIN cloud9 create-environment-membership --environment-id $(cloud9-env-show-id $ENV_NAME) --user-arn $USER_ARN --permissions $PERMS
 }
+# example:
+#   cloud9-env-add-membership ashleySecondPass arn:aws:sts::671846987296:assumed-role/AWSReservedSSO_uc3-dev-intern_1b6c0210f99781dd/agould read-only
 
 cloud9-env-remove-membership() {
     ENV_NAME=$1

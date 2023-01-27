@@ -22,8 +22,7 @@ cfn-stack-resources() {
 
 cfn-stack-template() {
     $AWSBIN cloudformation get-template --stack-name $1 --output json | \
-        jq -r  '.TemplateBody' | \
-	json2yaml.py
+        jq -r  '.TemplateBody'
 }
 
 cfn-stack-events() {

@@ -10,14 +10,11 @@ aws-cli-is-v2() {
 }
 
 if $(aws-cli-is-v2); then
-    AWSBIN="/usr/local/bin/aws --no-cli-pager --output yaml"
-    AWS2=true
+    AWSBIN="aws --no-cli-pager --output yaml"
 else
-    AWSBIN=/usr/bin/aws
-    AWS2=false
+    AWSBIN=aws
 fi
 export AWSBIN
-export AWS2
 
 
 aws-whoami() {

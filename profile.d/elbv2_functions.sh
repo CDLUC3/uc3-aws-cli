@@ -1,8 +1,6 @@
 # Shell functions for quarying elbv2 LoadBalancers and TargetGroups
+# All output is json
 
-
-
-# ELBv2 ALBs
 
 elb-lb-list() {
     response=$(aws elbv2 describe-load-balancers)
@@ -17,7 +15,7 @@ elb-lb-list() {
 }
 
 elb-lb-show() {
-    aws elbv2 describe-load-balancers --names $1
+    aws elbv2 describe-load-balancers --names $1 | jq -r .
 }
 
 elb-lb-list-arn() {
@@ -37,13 +35,11 @@ elb-lb-show-arn() {
 }
 
 elb-lb-show-tags() {
-    REGION=us-west-2
     LB=$1
     aws elbv2 describe-tags --resource-arns $(elb-lb-show-arn $LB) | jq -r '.TagDescriptions[].Tags[]'
 }
 
 elb-lb-show-attributes() {
-    REGION=us-west-2
     LB=$1
     aws elbv2 describe-load-balancer-attributes --load-balancer-arn $(elb-lb-show-arn $LB) | jq -r '.Attributes[]'
 }
@@ -117,7 +113,6 @@ elb-tg-show-arn() {
 }
 
 elb-tg-show-tags() {
-    REGION=us-west-2
     TG=$1
     aws elbv2 describe-tags --resource-arns $(elb-tg-show-arn $TG) | jq -r '.TagDescriptions[].Tags[]'
 }
@@ -159,13 +154,21 @@ elb-tg-modify-attributes() {
 elb-tg-register() {
     TG=$1
     TARGET=$2
-    aws elbv2 register-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-show-id $TARGET)
+    if [ -z "$AWS_DEFAULT_REGION" ]; then
+        echo "AWS_DEFAULT_REGION not defined"
+        return
+    fi
+    aws elbv2 register-targets --region $AWS_DEFAULT_REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-show-id $TARGET)
 }
 
 elb-tg-deregister() {
     TG=$1
     TARGET=$2
-    aws elbv2 deregister-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-show-id $TARGET)
+    if [ -z "$AWS_DEFAULT_REGION" ]; then
+        echo "AWS_DEFAULT_REGION not defined"
+        return
+    fi
+    aws elbv2 deregister-targets --region $AWS_DEFAULT_REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-show-id $TARGET)
 }
 
 

@@ -5,7 +5,7 @@ ec2-vpc-list() {
 }
 
 ec2-vpc-show() {
-  $AWSBIN ec2 describe-vpcs  --vpc-id $1
+  $AWSBIN ec2 describe-vpcs  --vpc-id $1 | yq -ry .
 }
 
 ec2-sg-list() {
@@ -14,7 +14,7 @@ ec2-sg-list() {
 
 ec2-sg-show() {
   SGNAME=$1
-  $AWSBIN ec2 describe-security-groups --filters "Name=group-name,Values=$SGNAME"
+  $AWSBIN ec2 describe-security-groups --filters "Name=group-name,Values=$SGNAME" | yq -ry .
 }
 
 ec2-instance-list() {
@@ -55,7 +55,6 @@ EOF
 
     usage() {
         echo "Usage: ec2-instance-show-tags [-h | <instance_name>]"
-	return
     }
 
     if [ $# -gt 0 ]; then
@@ -74,11 +73,13 @@ EOF
     else 
 	echo "Cant determine instance id of localhost.  Is this a ec2 instance?"
 	usage
+	return
     fi
 
     EC2TAGS=$($AWSBIN --output json ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
-    echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join("=")'
+    echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join(": ")'
 }
+alias ec2-tags=ec2-instance-show-tags
 
 ec2-instance-show-volumes() {
     NAME=$1
@@ -87,7 +88,7 @@ ec2-instance-show-volumes() {
 }
 
 ec2-snapshot-list() {
-  $AWSBIN ec2 describe-snapshots --owner-id self
+  $AWSBIN ec2 describe-snapshots --owner-id self | yq -ry .
 }
 
 
@@ -96,7 +97,8 @@ ec2-snapshot-list-for-instance() {
   VOLUME_IDS=$(ec2-instance-show-volumes $NAME)
   for ID in $VOLUME_IDS; do
     echo "VolumeId: $ID"
-    $AWSBIN ec2 describe-snapshots --filters Name=volume-id,Values=$ID
+    $AWSBIN ec2 describe-snapshots --filters Name=volume-id,Values=$ID | yq -ry .
+    echo
   done
 }
 # aws ec2 describe-snapshots --filters Name=volume-id,Values=vol-05601fca3c2422c4d,vol-058f384c04bf7abe7
@@ -104,8 +106,7 @@ ec2-snapshot-list-for-instance() {
 ec2-snapshots-create-for-instance() {
   NAME=$1
   INSTANCE_ID=$(ec2-instance-show-id $NAME)
-  $AWSBIN ec2 create-snapshots --description $NAME --instance-specification InstanceId=$INSTANCE_ID
-
+  $AWSBIN ec2 create-snapshots --description $NAME --instance-specification InstanceId=$INSTANCE_ID 
 }
 
 
@@ -117,7 +118,7 @@ ec2-subnet-list() {
 
 ec2-subnet-show() {
  NAME=$1
- $AWSBIN ec2 describe-subnets  --filters "Name=tag:Name,Values=$NAME"
+ $AWSBIN ec2 describe-subnets  --filters "Name=tag:Name,Values=$NAME" | yq -ry .
 }
 
 
