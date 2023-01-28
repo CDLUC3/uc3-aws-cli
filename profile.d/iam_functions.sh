@@ -1,4 +1,4 @@
-#!/bin/bash
+#y!/bin/bash
 #
 # these work for both aws-cli version 1 and 2
 
@@ -26,7 +26,7 @@ iam-role-list() {
 }
 
 iam-role-show() {
-    $AWSBIN iam get-role --role-name $1 | jq -r '.Role'
+    $AWSBIN iam get-role --role-name $1 | yq -ry '.Role'
     echo
     echo Inline Policies:
     $AWSBIN iam list-role-policies --role-name $1 | jq -r '.PolicyNames[]'
@@ -42,8 +42,7 @@ iam-role-list-inline-policies() {
 
 iam-role-show-inline-policies() {
     for POLICYNAME in $(iam-role-list-inline-policies $1); do
-        #$AWSBIN iam get-role-policy --role-name $1 --policy-name $POLICYNAME | jq -r
-        $AWSBIN --no-cli-pager --output yaml iam get-role-policy --role-name $1 --policy-name $POLICYNAME
+        $AWSBIN iam get-role-policy --role-name $1 --policy-name $POLICYNAME | yq -ry .
     done
 }
 
@@ -83,9 +82,7 @@ iam-policy-show() {
     fi
     OUTPUT=$($AWSBIN iam get-policy --policy-arn $ARN)
     VERSION=$(echo $OUTPUT | jq -r '.Policy.DefaultVersionId')
-    echo $OUTPUT | \
-	    jq -r '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
-    #$AWSBIN iam get-policy-version --policy-arn $ARN --version-id $VERSION | jq -r '.PolicyVersion'
-    $AWSBIN --no-cli-pager --output yaml iam get-policy-version --policy-arn $ARN --version-id $VERSION
+    echo $OUTPUT | yq -ry '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
+    $AWSBIN iam get-policy-version --policy-arn $ARN --version-id $VERSION | yq -ry '.PolicyVersion'
 }
 
