@@ -1,4 +1,21 @@
 #!/bin/bash
+#
+
+aws-version() {
+    aws --version | awk '{print $1}' | awk -F / '{print $2}'
+}
+
+aws-cli-is-v2() {
+    aws --version | egrep "^aws-cli\/2.*?" 2>&1 >/dev/null
+}
+
+if $(aws-cli-is-v2); then
+    AWSBIN="aws --no-cli-pager --output yaml"
+else
+    AWSBIN=aws
+fi
+export AWSBIN
+
 
 aws-whoami() {
   if [ $# -gt 0 ]; then
@@ -7,19 +24,19 @@ aws-whoami() {
       * ) return;;
     esac
   else
-    aws sts get-caller-identity
+    $AWSBIN sts get-caller-identity
   fi
 }
 
 aws-account-id() {
-  aws sts get-caller-identity | jq -r '.Account'
+  $AWSBIN sts get-caller-identity | yq -r '.Account'
 }
 
 aws-region ()
 {
   if [ $# -gt 0 ]; then
     case $1 in
-      '-h' ) echo "Set or display value of shell environment var AWS_DEFAULT_PROFILE";;
+      '-h' ) echo "Set or display value of shell environment var AWS_DEFAULT_REGION";;
       * ) export AWS_DEFAULT_REGION=$1;;
     esac
   else
@@ -53,11 +70,3 @@ EOF
   echo $AWS_PROFILE
 }
 
-aws-cli-is-v2() {
-    aws --version | egrep "^aws-cli\/2.*?" 2>&1 >/dev/null
-}
-
-aws-version() {
-    aws --version | awk '{print $1}' | awk -F / '{print $2}'
-}
-    

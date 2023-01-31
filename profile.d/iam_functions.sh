@@ -1,54 +1,53 @@
-#!/bin/bash
+#y!/bin/bash
 #
 # these work for both aws-cli version 1 and 2
 
 iam-user-list() {
-    aws iam list-users | jq -r '.Users[].UserName'
+    $AWSBIN iam list-users | jq -r '.Users[].UserName'
 }
 
 iam-user-show() {
-        aws iam get-user --user-name $1 | jq -r '.User'
+        $AWSBIN iam get-user --user-name $1 | jq -r '.User'
     echo Groups:
-    aws iam list-groups-for-user --user-name $1 | jq -r '.Groups[].GroupName'
+    $AWSBIN iam list-groups-for-user --user-name $1 | jq -r '.Groups[].GroupName'
 }
 
 iam-group-list() {
-    aws iam list-groups | jq -r '.Groups[].GroupName'
+    $AWSBIN iam list-groups | jq -r '.Groups[].GroupName'
 }
 
 iam-group-show() {
-    aws iam get-group --group-name $1 | grep -A 5 '"Group": {'
-    aws iam get-group --group-name $1 | grep UserName
+    $AWSBIN iam get-group --group-name $1 | grep -A 5 '"Group": {'
+    $AWSBIN iam get-group --group-name $1 | grep UserName
 }
 
 iam-role-list() {
-    aws iam list-roles | jq -r '.Roles[].RoleName'
+    $AWSBIN iam list-roles | jq -r '.Roles[].RoleName'
 }
 
 iam-role-show() {
-    aws iam get-role --role-name $1 | jq -r '.Role'
+    $AWSBIN iam get-role --role-name $1 | yq -ry '.Role'
     echo
     echo Inline Policies:
-    aws iam list-role-policies --role-name $1 | jq -r '.PolicyNames[]'
+    $AWSBIN iam list-role-policies --role-name $1 | jq -r '.PolicyNames[]'
     echo
     echo Attached Policies:
-    aws iam list-attached-role-policies --role-name $1 | jq -r '.AttachedPolicies[].PolicyName'
+    $AWSBIN iam list-attached-role-policies --role-name $1 | jq -r '.AttachedPolicies[].PolicyName'
     echo
 }
 
 iam-role-list-inline-policies() {
-    aws iam list-role-policies --role-name $1 | jq -r '.PolicyNames[]'
+    $AWSBIN iam list-role-policies --role-name $1 | jq -r '.PolicyNames[]'
 }
 
 iam-role-show-inline-policies() {
     for POLICYNAME in $(iam-role-list-inline-policies $1); do
-        #aws iam get-role-policy --role-name $1 --policy-name $POLICYNAME | jq -r
-        aws --no-cli-pager --output yaml iam get-role-policy --role-name $1 --policy-name $POLICYNAME
+        $AWSBIN iam get-role-policy --role-name $1 --policy-name $POLICYNAME | yq -ry .
     done
 }
 
 iam-role-list-attached-policy-arn() {
-    aws iam list-attached-role-policies --role-name $1 | jq -r '.AttachedPolicies[].PolicyArn'
+    $AWSBIN iam list-attached-role-policies --role-name $1 | jq -r '.AttachedPolicies[].PolicyArn'
 }
 
 iam-role-show-attached-policies() {
@@ -67,12 +66,12 @@ iam-role-show-policies() {
 }
 
 iam-policy-list() {
-    aws iam list-policies | jq -r '.Policies[].PolicyName' | sort
+    $AWSBIN iam list-policies | jq -r '.Policies[].PolicyName' | sort
 }
 
 iam-policy-show-arn() {
     NAME=$1
-    aws iam list-policies | jq -r ".Policies[] | select(.PolicyName == \"$NAME\") | .Arn"
+    $AWSBIN iam list-policies | jq -r ".Policies[] | select(.PolicyName == \"$NAME\") | .Arn"
 }
 
 iam-policy-show() {
@@ -81,11 +80,9 @@ iam-policy-show() {
     else
         ARN=$(iam-policy-show-arn $1)
     fi
-    OUTPUT=$(aws iam get-policy --policy-arn $ARN)
+    OUTPUT=$($AWSBIN iam get-policy --policy-arn $ARN)
     VERSION=$(echo $OUTPUT | jq -r '.Policy.DefaultVersionId')
-    echo $OUTPUT | \
-	    jq -r '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
-    #aws iam get-policy-version --policy-arn $ARN --version-id $VERSION | jq -r '.PolicyVersion'
-    aws --no-cli-pager --output yaml iam get-policy-version --policy-arn $ARN --version-id $VERSION
+    echo $OUTPUT | yq -ry '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
+    $AWSBIN iam get-policy-version --policy-arn $ARN --version-id $VERSION | yq -ry '.PolicyVersion'
 }
 
