@@ -11,6 +11,10 @@
 # Source awscli shell functions
 [ -f ~/.profile.d/ssm_functions.sh ] && . ~/.profile.d/ssm_functions.sh
 [ -f ~/.profile.d/elbv2_functions.sh ] && . ~/.profile.d/elbv2_functions.sh
+if [ ! -n "$AWS_DEFAULT_REGION" ]; then
+  echo "Environment var AWS_DEFAULT_REGION is not set."
+  exit 1
+fi
 
 # Get TargetGroup name from SSM ParameterStore
 SSM_PATH=$(ssm-path-from-tags)
@@ -20,7 +24,8 @@ if [ ! -n "$TG_NAME" ]; then
   exit 1
 fi
 
+
 # Run elbv2 command
 INSTANCE_ID=$(ec2-metadata -i | awk '{print $2}')
-aws elbv2 register-targets --region $REGION --target-group-arn $(elb-tg-show-arn $TG_NAME) --targets Id=$INSTANCE_ID
+aws elbv2 register-targets --target-group-arn $(elb-tg-show-arn $TG_NAME) --targets Id=$INSTANCE_ID
 
