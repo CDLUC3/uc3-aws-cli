@@ -18,10 +18,18 @@ ssm-param-get-verbose() {
     aws ssm get-parameter --name $1
 }
 
+ssm-param-get-secure() {
+    aws ssm get-parameter --name $1 --with-decryption
+}
+
 # for values which are URLs run `aws configure set cli_follow_urlparam false`
 # to prevent aws-cli attempting resolve the value from the internet
 ssm-param-put() {
     aws ssm put-parameter --name $1 --value $2 --type String
+}
+
+ssm-param-put-secure() {
+    aws ssm put-parameter --name $1 --value $2 --type SecureString --overwrite
 }
 
 ssm-param-put-overwrite() {
