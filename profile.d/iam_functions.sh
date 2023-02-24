@@ -1,43 +1,42 @@
-#y!/bin/bash
+#!/bin/bash
 #
 # these work for both aws-cli version 1 and 2
 
 iam-user-list() {
-    $AWSBIN iam list-users | jq -r '.Users[].UserName'
+    $AWSBIN iam list-users | yq -r '.Users[].UserName'
 }
 
 iam-user-show() {
-        $AWSBIN iam get-user --user-name $1 | jq -r '.User'
+    $AWSBIN iam get-user --user-name $1 | yq -ry '.User'
     echo Groups:
-    $AWSBIN iam list-groups-for-user --user-name $1 | jq -r '.Groups[].GroupName'
+    $AWSBIN iam list-groups-for-user --user-name $1 | yq -r '.Groups[].GroupName'
 }
 
 iam-group-list() {
-    $AWSBIN iam list-groups | jq -r '.Groups[].GroupName'
+    $AWSBIN iam list-groups | yq -r '.Groups[].GroupName'
 }
 
 iam-group-show() {
-    $AWSBIN iam get-group --group-name $1 | grep -A 5 '"Group": {'
-    $AWSBIN iam get-group --group-name $1 | grep UserName
+    $AWSBIN iam get-group --group-name $1
 }
 
 iam-role-list() {
-    $AWSBIN iam list-roles | jq -r '.Roles[].RoleName'
+    $AWSBIN iam list-roles | yq -r '.Roles[].RoleName'
 }
 
 iam-role-show() {
     $AWSBIN iam get-role --role-name $1 | yq -ry '.Role'
     echo
     echo Inline Policies:
-    $AWSBIN iam list-role-policies --role-name $1 | jq -r '.PolicyNames[]'
+    $AWSBIN iam list-role-policies --role-name $1 | yq -r '.PolicyNames[]'
     echo
     echo Attached Policies:
-    $AWSBIN iam list-attached-role-policies --role-name $1 | jq -r '.AttachedPolicies[].PolicyName'
+    $AWSBIN iam list-attached-role-policies --role-name $1 | yq -r '.AttachedPolicies[].PolicyName'
     echo
 }
 
 iam-role-list-inline-policies() {
-    $AWSBIN iam list-role-policies --role-name $1 | jq -r '.PolicyNames[]'
+    $AWSBIN iam list-role-policies --role-name $1 | yq -r '.PolicyNames[]'
 }
 
 iam-role-show-inline-policies() {
@@ -47,7 +46,7 @@ iam-role-show-inline-policies() {
 }
 
 iam-role-list-attached-policy-arn() {
-    $AWSBIN iam list-attached-role-policies --role-name $1 | jq -r '.AttachedPolicies[].PolicyArn'
+    $AWSBIN iam list-attached-role-policies --role-name $1 | yq -r '.AttachedPolicies[].PolicyArn'
 }
 
 iam-role-show-attached-policies() {
@@ -66,12 +65,12 @@ iam-role-show-policies() {
 }
 
 iam-policy-list() {
-    $AWSBIN iam list-policies | jq -r '.Policies[].PolicyName' | sort
+    $AWSBIN iam list-policies | yq -r '.Policies[].PolicyName' | sort
 }
 
 iam-policy-show-arn() {
     NAME=$1
-    $AWSBIN iam list-policies | jq -r ".Policies[] | select(.PolicyName == \"$NAME\") | .Arn"
+    $AWSBIN iam list-policies | yq -r ".Policies[] | select(.PolicyName == \"$NAME\") | .Arn"
 }
 
 iam-policy-show() {
@@ -81,8 +80,8 @@ iam-policy-show() {
         ARN=$(iam-policy-show-arn $1)
     fi
     OUTPUT=$($AWSBIN iam get-policy --policy-arn $ARN)
-    VERSION=$(echo $OUTPUT | jq -r '.Policy.DefaultVersionId')
-    echo $OUTPUT | yq -ry '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
+    VERSION=$(echo "$OUTPUT" | yq -r '.Policy.DefaultVersionId')
+    echo "$OUTPUT" | yq -ry '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
     $AWSBIN iam get-policy-version --policy-arn $ARN --version-id $VERSION | yq -ry '.PolicyVersion'
 }
 
