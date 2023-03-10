@@ -98,6 +98,9 @@ waf-webacl-list-rules() {
     fi
 }
 
+# waf-webacl-show-rule-samples uc3-dmptool-stg-waf > /tmp/waf_rule_samples.uc3-dmptool-stg-waf.$(date +"%Y%m%d")
+# cat /tmp/waf_rule_samples.uc3-dmptool-stg-waf.20230310 | json2yaml.py
+#
 waf-webacl-show-rule-samples() {
     WEBACL_NAME=$1
     SCOPE=$(waf-webacl-show-scope $WEBACL_NAME)
@@ -108,15 +111,19 @@ waf-webacl-show-rule-samples() {
         NOW=`date -u '+%Y-%m-%dT%H:%MZ'`
         WEBACL_ARN=$(waf-webacl-show-arn $WEBACL_NAME)
         WEBACL_RULES=$(waf-webacl-list-rules $WEBACL_NAME)
+        echo '['
         for rule in $WEBACL_RULES; do
-            echo $rule
+            echo "{\"RuleName\": \"$rule\","
+            echo "\"Output\":"
             aws wafv2 get-sampled-requests \
                 --web-acl-arn $WEBACL_ARN \
                 --scope $SCOPE \
                 --time-window StartTime="$START2",EndTime="$NOW" \
                 --rule-metric-name $rule \
                 --max-items 500 | jq .
+            echo '},'
         done
+        echo '{}]'
     fi
 }
 
