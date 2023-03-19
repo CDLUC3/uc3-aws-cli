@@ -129,7 +129,7 @@ waf-webacl-show-rule-samples() {
         START2=`date -u -d "@$START" '+%Y-%m-%dT%H:%MZ'`
         NOW=`date -u '+%Y-%m-%dT%H:%MZ'`
         WEBACL_ARN=$(waf-webacl-show-arn $WEBACL_NAME)
-        WEBACL_RULES=$(waf-webacl-list-rules $WEBACL_NAME)
+        WEBACL_RULES=$(waf-webacl-list-rulesets $WEBACL_NAME)
         echo '['
         for rule in $WEBACL_RULES; do
             echo "{\"RuleName\": \"$rule\","
