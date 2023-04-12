@@ -88,16 +88,38 @@ waf-webacl-show-tags() {
     fi
 }
 
-waf-webacl-list-rules() {
+waf-webacl-list-rulesets() {
+    waf-webacl-show $1 | jq -r ".WebACL.Rules[].VisibilityConfig.MetricName"
+    #waf-webacl-show $1 | jq -r "."
+}
+
+waf-ruleset-list-rules() {
+    RULESET_NAME=${1#*-}
+    VENDOR=${1%-*}
+    SCOPE='REGIONAL'
+    RESPONSE=$(aws wafv2 describe-managed-rule-group --vendor $VENDOR --name $RULESET_NAME --scope $SCOPE)
+    #echo $RESPONSE | jq -r "."
+    echo $RESPONSE
+}
+
+waf-webacl-show-rulesets() {
     WEBACL_NAME=$1
     SCOPE=$(waf-webacl-show-scope $WEBACL_NAME)
     if [ -n "$SCOPE" ]; then
-        WEBACL_ID=$(waf-webacl-show-id $WEBACL_NAME)
-        RESPONSE=$(aws wafv2 get-web-acl --name $WEBACL_NAME --id $WEBACL_ID --scope $SCOPE)
-        echo $RESPONSE | jq -r ".WebACL.Rules[].VisibilityConfig.MetricName"
+        RULESETS=$(waf-webacl-list-rulesets $WEBACL_NAME)
+        for ruleset in $RULESETS; do
+            echo "RuleSet: $ruleset"
+            waf-ruleset-list-rules $ruleset | yq -ry "."
+            echo
+        done
     fi
 }
 
+
+
+# waf-webacl-show-rule-samples uc3-dmptool-stg-waf > /tmp/waf_rule_samples.uc3-dmptool-stg-waf.$(date +"%Y%m%d")
+# cat /tmp/waf_rule_samples.uc3-dmptool-stg-waf.20230310 | json2yaml.py
+#
 waf-webacl-show-rule-samples() {
     WEBACL_NAME=$1
     SCOPE=$(waf-webacl-show-scope $WEBACL_NAME)
@@ -107,16 +129,20 @@ waf-webacl-show-rule-samples() {
         START2=`date -u -d "@$START" '+%Y-%m-%dT%H:%MZ'`
         NOW=`date -u '+%Y-%m-%dT%H:%MZ'`
         WEBACL_ARN=$(waf-webacl-show-arn $WEBACL_NAME)
-        WEBACL_RULES=$(waf-webacl-list-rules $WEBACL_NAME)
+        WEBACL_RULES=$(waf-webacl-list-rulesets $WEBACL_NAME)
+        echo '['
         for rule in $WEBACL_RULES; do
-            echo $rule
+            echo "{\"RuleName\": \"$rule\","
+            echo "\"Output\":"
             aws wafv2 get-sampled-requests \
                 --web-acl-arn $WEBACL_ARN \
                 --scope $SCOPE \
                 --time-window StartTime="$START2",EndTime="$NOW" \
                 --rule-metric-name $rule \
                 --max-items 500 | jq .
+            echo '},'
         done
+        echo '{}]'
     fi
 }
 

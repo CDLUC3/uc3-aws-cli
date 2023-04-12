@@ -130,7 +130,7 @@ elb-tg-hosts() {
     HEALTH=$(elb-tg-health $NAME)
     IDS=$(echo $HEALTH | jq -r '.TargetHealthDescriptions[].Target.Id')
     for id in $IDS; do
-        hostname=$(ec2-instance-name $id)
+        hostname=$(ec2-instance-show-name-from-id $id)
         status=$(echo $HEALTH | jq -r ".TargetHealthDescriptions[] | select(.Target.Id == \"$id\") | .TargetHealth.State")
         echo -e "$hostname\t$id\t$status"
     done
