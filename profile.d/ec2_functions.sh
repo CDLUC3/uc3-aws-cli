@@ -110,6 +110,19 @@ ec2-snapshots-create-for-instance() {
 }
 
 
+#ebs volumes
+
+ec2-volumes-show() {
+  NAME=$1
+  VOLUME_IDS=$(ec2-instance-show-volumes $NAME)
+  for ID in $VOLUME_IDS; do
+    echo "VolumeId: $ID"
+    #$AWSBIN ec2 describe-volumes --filters Name=volume-id,Values=$ID | yq -ry .
+    $AWSBIN ec2 describe-volumes --volume-ids $ID | yq -ry .
+    echo
+  done
+}
+
 
 # subnets
 ec2-subnet-list() {

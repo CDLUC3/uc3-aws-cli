@@ -57,6 +57,15 @@ waf-webacl-show-arn() {
     fi
 }
 
+waf-webacl-show-logging-configuration() {
+    WEBACL_NAME=$1
+    WEBACL_ARN=$(waf-webacl-show-arn $WEBACL_NAME)
+    RESPONSE=$(aws wafv2 get-logging-configuration --resource-arn $WEBACL_ARN 2>/dev/null)
+    if [ -n "$RESPONSE" ]; then
+        echo $RESPONSE
+    fi
+}
+
 waf-webacl-show() {
     WEBACL_NAME=$1
     SCOPE=$(waf-webacl-show-scope $WEBACL_NAME)
@@ -145,6 +154,35 @@ waf-webacl-show-rule-samples() {
         echo '{}]'
     fi
 }
+waf-webacl-log-rule-samples() {
+    [ $# != 2 ] && echo "usage: waf-webacl-log-rule-samples <webacl-name> <log-directory>" && return
+    WEBACL_NAME=$1
+    LOGDIR=$2
+    [ -d "$LOGDIR" ] || mkdir -p $LOGDIR
+    #LOGFILE=$WEBACL_NAME.samples.$(date +"%s")
+    LOGFILE=$WEBACL_NAME
+    SCOPE=$(waf-webacl-show-scope $WEBACL_NAME)
+    if [ -n "$SCOPE" ]; then
+        SEC=10800
+        START=$((`date '+%s'` - $SEC ))
+        START2=`date -u -d "@$START" '+%Y-%m-%dT%H:%MZ'`
+        NOW=`date -u '+%Y-%m-%dT%H:%MZ'`
+        WEBACL_ARN=$(waf-webacl-show-arn $WEBACL_NAME)
+        WEBACL_RULES=$(waf-webacl-list-rulesets $WEBACL_NAME)
+        for rule in $WEBACL_RULES; do
+            aws wafv2 get-sampled-requests \
+                --web-acl-arn $WEBACL_ARN \
+                --scope $SCOPE \
+                --time-window StartTime="$START2",EndTime="$NOW" \
+                --rule-metric-name $rule \
+                --no-paginate \
+                --no-cli-pager \
+                --output json \
+                --max-items 500 | jq -c ".SampledRequests[]"
+                #--max-items 500 | jq -c ".SampledRequests[]" >> $LOGDIR/$LOGFILE
+        done > $LOGDIR/$LOGFILE
+    fi
+}
 
 waf-resources-for-webacl() {
     WEBACL_NAME=$1
@@ -182,3 +220,33 @@ waf-resources-for-webacl() {
 # cat ~/tmp/wafv2_metrics | jq -r ".Metrics[] | select(.Dimensions[] | select(.Name == \"WebACL\" and .Value == \"uc3-dmptool-stg-waf\"))"
 #
 # https://docs.aws.amazon.com/waf/latest/developerguide/monitoring-cloudwatch.html
+#
+#
+#
+
+# How to get data on custom local rules
+#
+# [cloudshell-user@ip-10-6-97-56 ~]$ aws wafv2 --scope=REGIONAL get-web-acl --name uc3-mrtui-prd-waf --id 67c93e16-c460-4436-a98a-c174dd9c1f34 | jq '.WebACL.Rules[].Name'
+# "AWS-AWSManagedRulesAmazonIpReputationList"
+# "AWS-AWSManagedRulesWordPressRuleSet"
+# "AWS-AWSManagedRulesPHPRuleSet"
+# "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+# "presign_file"
+# "AWS-AWSManagedRulesCommonRuleSet"
+# "AWS-AWSManagedRulesLinuxRuleSet"
+# "wordpress"
+# "phpcgi"
+# "windows"
+# "unix"
+# "escape"
+# 
+# [cloudshell-user@ip-10-6-97-56 ~]$ aws wafv2 get-sampled-requests --web-acl-arn arn:aws:wafv2:us-west-2:451826914157:regional/webacl/uc3-mrtui-prd-waf/67c93e16-c460-4436-a98a-c174dd9c1f34 --rule-metric-name unix --scope REGIONAL --time-window StartTime=`date -u '+%Y-%m-%dT%H:%MZ'`,EndTime=`date -u '+%Y-%m-%dT%H:%MZ'` --max-items 10
+# 
+# {
+#     "SampledRequests": [],
+#     "PopulationSize": 0,
+#     "TimeWindow": {
+#         "StartTime": "2023-03-23T20:41:00+00:00",
+#         "EndTime": "2023-03-23T20:41:00+00:00"
+#     }
+# }
