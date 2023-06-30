@@ -41,11 +41,24 @@ elb-lb-show-tags() {
         jq -r '.TagDescriptions[].Tags[] | [.Key, .Value] | join(": ")'
 }
 
+# aws elbv2 modify-load-balancer-attributes --load-balancer-arn arn:aws:elasticloadbalancing:us-west-2:451826914157:loadbalancer/app/uc3-dmptool-dev-alb/dc465ab590575ee1 --attributes Key=access_logs.s3.prefix,Value=dev
+#
 elb-lb-show-attributes() {
     LB=$1
     aws elbv2 describe-load-balancer-attributes --load-balancer-arn $(elb-lb-show-arn $LB) | \
         jq -r '.Attributes[] | [.Key, .Value] | join(": ")'
 }
+
+elb-lb-modify-attributes() {
+    LB=$1
+    KEY=$2
+    VALUE=$3
+    aws elbv2 modify-load-balancer-attributes --load-balancer-arn $(elb-lb-show-arn $LB) --attributes Key=$KEY,Value=$VALUE
+}
+
+
+
+
 
 ## Return ALB and TargetGroup names for given ec2 instance name.
 ## If no instance name provided, get instance id from local ec2-metadata.

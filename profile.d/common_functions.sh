@@ -2,11 +2,11 @@
 #
 
 aws-version() {
-    aws --version | awk '{print $1}' | awk -F / '{print $2}'
+    aws --version 2>&1 | awk '{print $1}' | awk -F / '{print $2}'
 }
 
 aws-cli-is-v2() {
-    aws --version | egrep "^aws-cli\/2.*?" 2>&1 >/dev/null
+    aws --version 2>&1 | egrep "^aws-cli\/2.*?" >/dev/null
 }
 
 if $(aws-cli-is-v2); then

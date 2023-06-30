@@ -11,7 +11,7 @@ PARAMPATH=$1
 }
 
 ssm-param-get() {
-    aws ssm get-parameter --name $1 | jq -r '.Parameter.Value'
+    aws ssm get-parameter --name $1 --with-decryption | jq -r '.Parameter.Value'
 }
 
 ssm-param-get-verbose() {
@@ -22,6 +22,10 @@ ssm-param-get-verbose() {
 # to prevent aws-cli attempting resolve the value from the internet
 ssm-param-put() {
     aws ssm put-parameter --name $1 --value $2 --type String
+}
+
+ssm-param-put-encrypt() {
+    aws ssm put-parameter --name $1 --value $2 --type SecureString
 }
 
 ssm-param-put-overwrite() {
