@@ -20,7 +20,7 @@ get_ssm_value_by_name() {
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
   val=`aws ssm get-parameter --name "${SSMPATH}" --region ${REGION} | jq -r '.Parameter' | jq -r '.Value'`
-  [ $val ] || die "Parameter ${SSMPATH} not found"
+  [ -n "$val" ] || die "Parameter ${SSMPATH} not found"
   echo $val
 }
 
@@ -36,14 +36,14 @@ get_value_from_ssm_json() {
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
   val=`echo ${SSMJSON} | jq ".[] | select(.Name==\"${SSMPATH}\")" | jq -r .Value`
-  [ $val ] || die "Parameter ${SSMPATH} not found"
+  [ -n "$val" ] || die "Parameter ${SSMPATH} not found"
   echo $val
 }
 
 get_value_from_tag_json() {
   P=$1
   val=`echo ${TAGJSON} | jq ".[] | select(.Key==\"${P}\")" | jq -r .Value`
-  [ $val ] || die "Parameter ${P} not found"
+  [ -n "$val" ] || die "Parameter ${P} not found"
   echo $val
 }
 
