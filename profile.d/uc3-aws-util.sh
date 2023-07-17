@@ -19,7 +19,7 @@ get_ssm_value_by_name() {
   check_ssm_root
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
-  val=`aws ssm get-parameter --name "${SSMPATH}" --region ${REGION} | jq -r '.Parameter' | jq -r '.Value'`
+  val=`aws ssm get-parameter --name "${SSMPATH}" --region ${REGION} --with-decryption | jq -r '.Parameter' | jq -r '.Value'`
   [ -n "$val" ] || die "Parameter ${SSMPATH} not found"
   echo $val
 }
@@ -28,7 +28,7 @@ get_ssm_json_by_path() {
   check_ssm_root
   P=$1
   SSMPATH="${SSM_ROOT_PATH}${P}"
-  SSMJSON_RAW=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION}` || die "Parameter Path ${SSMPATH} not found"
+  SSMJSON_RAW=`aws ssm get-parameters-by-path --recursive --path "${SSMPATH}" --region ${REGION} --with-decryption` || die "Parameter Path ${SSMPATH} not found"
   SSMJSON=`echo $SSMJSON_RAW | jq -r '.Parameters'`
 }
 
