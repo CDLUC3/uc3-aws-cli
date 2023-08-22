@@ -7,7 +7,7 @@ Utility scripts for accessing AWS Client resources from UC3 servers.
   - SSM_DB_NAME (for servers with mysql)
   - SSM_DB_ROLE (defaults to readonly)
 - jq installed on the machine
-- yq installed in python vertual environment
+- yq installed in python virtual environment
 - ssm get-parameters-by-path access
 
 
@@ -91,16 +91,18 @@ of this repo and then edit the `uc3_awscli::awscli::revision` attribute:
 Use `pyenv` tool to manage python virtual environments.  This must be installed into
 your home directy.  See more info at: https://github.com/pyenv/pyenv
 
+Also see [Create Python Virual Environment with pyenv](https://github.com/CDLUC3/uc3ops-ansible-inventory#create-python-virual-environment-with-pyenv) in our [UC3 Ansible Inventory](https://github.com/CDLUC3/uc3ops-ansible-inventory) repository.
+
+
 The simple recipe:
+
 ```
-curl https://pyenv.run | bash
-cat << \EOF >> ~/.bashrc
+curl https://pyenv.run | bash cat << \EOF >> ~/.bashrc
 
 # pyenv stuff
 #
 export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
 EOF
 
 . ~/.bashrc
