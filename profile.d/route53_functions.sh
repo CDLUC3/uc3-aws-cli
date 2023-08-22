@@ -227,3 +227,5 @@ route53-recordset-show-alias() {
 #        echo
 #    done
 #}
+#
+#  aws route53 list-tags-for-resource --resource-type hostedzone --resource-id Z0417901355WORCWV4NEY
