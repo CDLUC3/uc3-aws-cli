@@ -23,7 +23,7 @@ secrets-put() {
 }
 
 secrets-delete() {
-    aws secretsmanager delete-secret --name $1
+    aws secretsmanager delete-secret --secret-id $1
 }
 
 
