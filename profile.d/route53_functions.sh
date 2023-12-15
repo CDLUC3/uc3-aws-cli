@@ -140,7 +140,6 @@ route53-recordset-show-cname() {
     fi
 }
 
-
 route53-recordset-show-alias() {
     if [ $# -ne 2 ]; then
         echo "Usage: route53-recordset-show-alias <domain_name> <alias_target>"
@@ -162,6 +161,41 @@ route53-recordset-show-alias() {
     fi
 }
 
+
+
+route53-recordset-delete() {
+    if [ $# -ne 2 ]; then
+        echo "Usage: route53-recordset-delete <domain_name> <host_name>"
+        return
+    fi
+    DOMAIN_NAME=${1%%.}.
+    HOST_NAME=${2%%.}.
+    FQDN=${HOST_NAME%%$DOMAIN_NAME}$DOMAIN_NAME
+    #echo $FQDN
+    ZONE_IDS=$(route53-hz-show-id $DOMAIN_NAME)
+    PUBLIC_ID=$(echo $ZONE_IDS | jq -r '.[] | select(.PrivateZone == false) | .Id' | awk -F'/' '{print $3}')
+    PRIVATE_ID=$(echo $ZONE_IDS | jq -r '.[] | select(.PrivateZone == true) | .Id' | awk -F'/' '{print $3}')    
+    if [ -n "$PUBLIC_ID" ]; then
+        echo Public Hosted Zone:
+        RECORDSET=$(aws route53 list-resource-record-sets --hosted-zone-id $PUBLIC_ID | jq -r ".ResourceRecordSets[] | select(.Name == \"$FQDN\")")
+        echo $RECORDSET
+        if [ -n "$RECORDSET" ]; then
+            CHANGE_BATCH="{\"Changes\": [{\"Action\": \"DELETE\", \"ResourceRecordSet\": $RECORDSET}]}"
+            echo $CHANGE_BATCH
+            aws route53 change-resource-record-sets --hosted-zone-id $PUBLIC_ID --change-batch "$CHANGE_BATCH"
+        fi
+    fi
+    if [ -n "$PRIVATE_ID" ]; then
+        echo Private Hosted Zone:
+        RECORDSET=$(aws route53 list-resource-record-sets --hosted-zone-id $PRIVATE_ID | jq -r ".ResourceRecordSets[] | select(.Name == \"$FQDN\")")
+        echo $RECORDSET
+        if [ -n "$RECORDSET" ]; then
+            CHANGE_BATCH="{\"Changes\": [{\"Action\": \"DELETE\", \"ResourceRecordSet\": $RECORDSET}]}"
+            echo $CHANGE_BATCH
+            aws route53 change-resource-record-sets --hosted-zone-id $PRIVATE_ID --change-batch "$CHANGE_BATCH"
+        fi
+    fi
+}
 
 
 
