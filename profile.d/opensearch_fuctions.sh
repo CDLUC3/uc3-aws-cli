@@ -15,3 +15,7 @@ os-domain-show-config() {
     aws --output yaml opensearch describe-domain-config --domain-name $NAME
 }
 
+os-domain-update() {
+    NAME=$1
+    aws opensearch start-service-software-update --domain-name $NAME
+}
