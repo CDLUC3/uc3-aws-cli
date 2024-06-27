@@ -1,7 +1,6 @@
 # Shell functions for quarying elbv2 LoadBalancers and TargetGroups
 
 elb-lb-list() {
-    # processing via json
     response=$(aws elbv2 describe-load-balancers)
     loadbalancers=$(echo $response | jq -r '.LoadBalancers[]')
     nextmarker=$(echo $response | jq -r '.NextMarker')
@@ -219,14 +218,11 @@ elb-tg-deregister() {
 elb-listener-for-alb() {
     NAME=$1
     ARN=$(elb-lb-show-arn $NAME)
-    #aws elbv2 describe-listeners --load-balancer-arn $ARN | jq -r .
     $AWSBIN elbv2 describe-listeners --load-balancer-arn $ARN
 } 
 
 elb-listener-for-alb-show-arn() {
     NAME=$1
-    #ARN=$(elb-lb-show-arn $NAME)
-    #aws elbv2 describe-listeners --load-balancer-arn $ARN | jq -r '.Listeners[].ListenerArn'
     elb-listener-for-alb $NAME | yq -r '.Listeners[].ListenerArn'
 } 
 
