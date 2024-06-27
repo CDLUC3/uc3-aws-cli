@@ -146,18 +146,15 @@ elb-tg-hosts() {
     NAME=$1
     TARGETTYPE=$(elb-tg-show-targettype $NAME)
     HEALTH=$(elb-tg-health $NAME)
-    echo "$HEALTH"
-    echo "$TARGETTYPE"
     IDS=$(echo "$HEALTH" | yq -r '.TargetHealthDescriptions[].Target.Id')
-    #echo "$IDS"
     for id in $IDS; do
-        echo $id
         status=$(echo "$HEALTH" | yq -r ".TargetHealthDescriptions[] | select(.Target.Id == \"$id\") | .TargetHealth.State")
-        echo $status
-        if [ $TARGETTYPE == "ip" ]; then
+        if [ $TARGETTYPE == "instance" ]; then
             hostname=$(ec2-instance-show-name-from-id $id)
+            echo -e "$hostname\t$id\t$status"
+        else
+            echo -e "$id\t$status"
         fi
-        #echo -e "$hostname\t$id\t$status"
     done
 }        
 
@@ -222,13 +219,15 @@ elb-tg-deregister() {
 elb-listener-for-alb() {
     NAME=$1
     ARN=$(elb-lb-show-arn $NAME)
-    aws elbv2 describe-listeners --load-balancer-arn $ARN | jq -r .
+    #aws elbv2 describe-listeners --load-balancer-arn $ARN | jq -r .
+    $AWSBIN elbv2 describe-listeners --load-balancer-arn $ARN
 } 
 
 elb-listener-for-alb-show-arn() {
     NAME=$1
-    ARN=$(elb-lb-show-arn $NAME)
-    aws elbv2 describe-listeners --load-balancer-arn $ARN | jq -r '.Listeners[].ListenerArn'
+    #ARN=$(elb-lb-show-arn $NAME)
+    #aws elbv2 describe-listeners --load-balancer-arn $ARN | jq -r '.Listeners[].ListenerArn'
+    elb-listener-for-alb $NAME | yq -r '.Listeners[].ListenerArn'
 } 
 
 elb-listener-rules-for-alb() {
@@ -236,7 +235,8 @@ elb-listener-rules-for-alb() {
     RULE_ARNS=$(elb-listener-for-alb-show-arn  $NAME)
     for arn in $RULE_ARNS; do
         echo "ListenerArn: $arn"
-        aws elbv2 describe-rules --listener-arn $arn | jq -r .
+        $AWSBIN elbv2 describe-rules --listener-arn $arn
+        echo
     done
 }
 
