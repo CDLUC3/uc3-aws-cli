@@ -9,19 +9,15 @@ cfn-stack-list() {
 
 cfn-stack-show() {
     $AWSBIN cloudformation describe-stacks --stack-name $1 | yq -ry '.Stacks[]'
-    echo
-    echo Resources:
-    $AWSBIN cloudformation describe-stack-resources --stack-name $1 | yq -r '.StackResources[] | .LogicalResourceId, .ResourceType, ""'
 }
 
 cfn-stack-resources() {
-    $AWSBIN cloudformation describe-stack-resources --stack-name $1 | \
-        yq -ry '.StackResources[]' | \
-        egrep -v "StackId|StackName"
+    $AWSBIN cloudformation describe-stack-resources --stack-name $1 | yq -r '.StackResources[] | .LogicalResourceId, .ResourceType, ""'
 }
 
 cfn-stack-template() {
-    $AWSBIN cloudformation get-template --stack-name $1 yq -ry  '.TemplateBody'
+    # pipe output to json2yaml.py
+    $AWSBIN cloudformation get-template --stack-name $1 --output json | jq -r  '.TemplateBody'
 }
 
 cfn-stack-events() {
