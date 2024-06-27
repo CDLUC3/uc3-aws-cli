@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 
 ec2-vpc-list() {
+  $AWSBIN ec2 describe-vpcs | yq -r '.Vpcs[].VpcId' 
+}
+
+ec2-vpc-list-cidr() {
   $AWSBIN ec2 describe-vpcs | yq -ry '.Vpcs[] | {"Id": .VpcId, "Cidr": .CidrBlock}' 
 }
 
 ec2-vpc-show() {
   $AWSBIN ec2 describe-vpcs  --vpc-id $1 | yq -ry .
+}
+
+ec2-vpc-show-cidr() {
+  $AWSBIN ec2 describe-vpcs  --vpc-id $1 | yq -r '.Vpcs[].CidrBlock'
 }
 
 ec2-sg-list() {
@@ -75,9 +83,8 @@ EOF
 	usage
 	return
     fi
-
-    EC2TAGS=$($AWSBIN --output json ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID})
-    echo $EC2TAGS | jq -r '.Tags[] | [.Key, .Value] | join(": ")'
+    $AWSBIN ec2 describe-tags --filter Name=resource-id,Values=${INSTANCE_ID} | \
+        yq -r '.Tags[] | [.Key, .Value] | join(": ")'
 }
 alias ec2-tags=ec2-instance-show-tags
 

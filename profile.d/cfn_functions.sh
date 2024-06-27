@@ -21,9 +21,7 @@ cfn-stack-template() {
 }
 
 cfn-stack-events() {
-    $AWSBIN cloudformation describe-stack-events --stack-name $1 | \
-        yq -ry '.StackEvents[]' | \
-        egrep -v "StackId|EventId|StackName"
+    $AWSBIN cloudformation describe-stack-events --stack-name $1 | yq -ry '.StackEvents[]'
 }
 
 cfn-stack-drift() {

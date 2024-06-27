@@ -1,9 +1,7 @@
 # Shell functions for quarying elbv2 LoadBalancers and TargetGroups
-#
-# All output is json
-
 
 elb-lb-list() {
+    # processing via json
     response=$(aws elbv2 describe-load-balancers)
     loadbalancers=$(echo $response | jq -r '.LoadBalancers[]')
     nextmarker=$(echo $response | jq -r '.NextMarker')
@@ -16,7 +14,7 @@ elb-lb-list() {
 }
 
 elb-lb-show() {
-    aws elbv2 describe-load-balancers --names $1 | jq -r .
+    $AWSBIN elbv2 describe-load-balancers --names $1
 }
 
 elb-lb-list-arn() {
@@ -38,7 +36,7 @@ elb-lb-show-arn() {
 elb-lb-show-tags() {
     LB=$1
     aws elbv2 describe-tags --resource-arns $(elb-lb-show-arn $LB) | \
-        jq -r '.TagDescriptions[].Tags[] | [.Key, .Value] | join(": ")'
+        jq -r '.TagDescriptions[].Tags[] | [.Key, .Value] | join(":\t")'
 }
 
 # aws elbv2 modify-load-balancer-attributes --load-balancer-arn arn:aws:elasticloadbalancing:us-west-2:451826914157:loadbalancer/app/uc3-dmptool-dev-alb/dc465ab590575ee1 --attributes Key=access_logs.s3.prefix,Value=dev
@@ -119,33 +117,47 @@ elb-tg-list-arn() {
        
 elb-tg-show() {
     NAME=$1
-    aws elbv2 describe-target-groups --names $NAME | jq -r ".TargetGroups[]"
+    $AWSBIN elbv2 describe-target-groups --names $NAME | yq -ry ".TargetGroups[]"
 }
 
 elb-tg-show-arn() {
     NAME=$1
-    elb-tg-show $NAME | jq -r '.TargetGroupArn'
+    elb-tg-show $NAME | yq -r '.TargetGroupArn'
+}
+
+elb-tg-show-targettype() {
+    NAME=$1
+    elb-tg-show $NAME | yq -r '.TargetType'
 }
 
 elb-tg-show-tags() {
     TG=$1
-    aws elbv2 describe-tags --resource-arns $(elb-tg-show-arn $TG) | jq -r '.TagDescriptions[].Tags[]'
+    aws elbv2 describe-tags --resource-arns $(elb-tg-show-arn $TG) | \
+        jq -r '.TagDescriptions[].Tags[] | [.Key, .Value] | join(":\t")'
 }
 
 elb-tg-health() {
     NAME=$1
     ARN=$(elb-tg-show-arn $NAME)
-    aws elbv2 describe-target-health --target-group-arn $ARN
+    $AWSBIN elbv2 describe-target-health --target-group-arn $ARN
 }
 
 elb-tg-hosts() {
     NAME=$1
+    TARGETTYPE=$(elb-tg-show-targettype $NAME)
     HEALTH=$(elb-tg-health $NAME)
-    IDS=$(echo $HEALTH | jq -r '.TargetHealthDescriptions[].Target.Id')
+    echo "$HEALTH"
+    echo "$TARGETTYPE"
+    IDS=$(echo "$HEALTH" | yq -r '.TargetHealthDescriptions[].Target.Id')
+    #echo "$IDS"
     for id in $IDS; do
-        hostname=$(ec2-instance-show-name-from-id $id)
-        status=$(echo $HEALTH | jq -r ".TargetHealthDescriptions[] | select(.Target.Id == \"$id\") | .TargetHealth.State")
-        echo -e "$hostname\t$id\t$status"
+        echo $id
+        status=$(echo "$HEALTH" | yq -r ".TargetHealthDescriptions[] | select(.Target.Id == \"$id\") | .TargetHealth.State")
+        echo $status
+        if [ $TARGETTYPE == "ip" ]; then
+            hostname=$(ec2-instance-show-name-from-id $id)
+        fi
+        #echo -e "$hostname\t$id\t$status"
     done
 }        
 

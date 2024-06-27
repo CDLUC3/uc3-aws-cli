@@ -1,14 +1,14 @@
 # codecommit
 coco-list() {
-    aws codecommit list-repositories
+    $AWSBIN codecommit list-repositories
 }
 
 coco-create() {
-    aws codecommit create-repository --repository-name $1
+    $AWSBIN codecommit create-repository --repository-name $1
 }   
 
 coco-delete() {
-    aws codecommit delete-repository --repository-name $1
+    $AWSBIN codecommit delete-repository --repository-name $1
 }   
 
 coco-clone() {
