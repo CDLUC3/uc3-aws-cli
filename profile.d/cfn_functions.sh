@@ -15,14 +15,13 @@ cfn-stack-show() {
 }
 
 cfn-stack-resources() {
-    aws cloudformation describe-stack-resources --stack-name $1 | \
+    $AWSBIN cloudformation describe-stack-resources --stack-name $1 | \
         yq -ry '.StackResources[]' | \
         egrep -v "StackId|StackName"
 }
 
 cfn-stack-template() {
-    $AWSBIN cloudformation get-template --stack-name $1 --output json | \
-        jq -r  '.TemplateBody'
+    $AWSBIN cloudformation get-template --stack-name $1 yq -ry  '.TemplateBody'
 }
 
 cfn-stack-events() {

@@ -1,21 +1,33 @@
 #!/bin/bash
 #
+# to list all functions in shell:
+#   compgen -A function
+#
+# to show the contents of a function
+#   type <function name>
+
+
+AWSBIN="aws --no-cli-pager --output yaml"
+export AWSBIN
 
 aws-version() {
     aws --version 2>&1 | awk '{print $1}' | awk -F / '{print $2}'
 }
 
-aws-cli-is-v2() {
-    aws --version 2>&1 | egrep "^aws-cli/2.*?" >/dev/null
-}
-
-if $(aws-cli-is-v2); then
-    AWSBIN="aws --no-cli-pager --output yaml"
-else
-    AWSBIN=aws
-fi
-export AWSBIN
-
+# We no longer support aws-cli v1. And yq is a requirement
+#
+#aws-cli-is-v2() {
+#    aws --version 2>&1 | egrep "^aws-cli/2.*?" >/dev/null
+#}
+#
+#if ! $(aws-cli-is-v2); then
+#    echo blee
+#    echo "uc3-aws-cli: aws-cli version 1 is depricated.  Please upgrade to v2."
+#fi
+#
+#if ! $(which yq 2>&1 > /dev/null); then
+#    echo "uc3-aws-cli: cant find yq.  please install"
+#if 
 
 aws-whoami() {
   if [ $# -gt 0 ]; then
