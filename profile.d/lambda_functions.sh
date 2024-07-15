@@ -3,7 +3,7 @@
 # Lambda query functions
 
 lambda-function-list() {
-    $AWSBIN lambda list-functions | jq -r .Functions[].FunctionName
+    $AWSBIN lambda list-functions | yq -r .Functions[].FunctionName
 }
 
 lambda-function-show() {
@@ -11,13 +11,24 @@ lambda-function-show() {
 }
 
 lambda-function-show-policy() {
-    $AWSBIN lambda get-policy --function-name $1 --output text | yq -ry . 2>/dev/null
+    NAME=$1
+    $AWSBIN lambda get-policy --function-name $NAME > /dev/null 2>&1 && \
+    $AWSBIN lambda get-policy --function-name $NAME --output json | jq -r .Policy | json2yaml.py
 }
 
 lambda-function-show-config() {
     $AWSBIN lambda get-function-configuration --function-name $1 | yq -ry . 
 }
 
+lambda-function-download-code() {
+    NAME=$1
+    TMPDIR=$(mktemp -d)
+    echo "Downloading to $TMPDIR/function_code.zip"
+    aws lambda get-function --function-name $NAME --query 'Code.Location'  | xargs wget -q -O $TMPDIR/function_code.zip
+    echo "Unzipping into $TMPDIR"
+    unzip -q -d $TMPDIR $TMPDIR/function_code.zip
+    ls -l $TMPDIR
+}
 
 #lambda-function-update() {
 #    bucket=$1
