@@ -36,9 +36,14 @@ os-domain-nodes() {
     $AWSBIN opensearch describe-domain-nodes --domain-name $NAME
 }
 
-os-domain-update() {
+os-domain-software-update() {
     NAME=$1
     $AWSBIN opensearch start-service-software-update --domain-name $NAME
+}
+
+os-domain-software-update-cancel() {
+    NAME=$1
+    $AWSBIN opensearch cancel-service-software-update --domain-name $NAME
 }
 
 os-domain-show-scheduled-actions() {
@@ -51,16 +56,31 @@ os-domain-show-change-progress() {
     $AWSBIN opensearch describe-domain-change-progress --domain-name $NAME
 }
 
-os-domain-show-upgrade-versions() {
+os-domain-upgrade-versions() {
     NAME=$1
-    VERSION=$2
     $AWSBIN opensearch get-compatible-versions --domain-name $NAME
 }
 
-os-domain-upgrade() {
+os-domain-upgrade-history() {
+    NAME=$1
+    $AWSBIN opensearch get-upgrade-history --domain-name $NAME
+}
+
+os-domain-upgrade-status() {
+    NAME=$1
+    $AWSBIN opensearch get-upgrade-status --domain-name $NAME
+}
+
+os-domain-upgrade-noop() {
     NAME=$1
     VERSION=$2
     $AWSBIN opensearch upgrade-domain --domain-name $NAME --target-version $VERSION --perform-check-only
+}
+
+os-domain-upgrade-exec() {
+    NAME=$1
+    VERSION=$2
+    $AWSBIN opensearch upgrade-domain --domain-name $NAME --target-version $VERSION
 }
 
 
@@ -75,11 +95,16 @@ os-domain-upgrade() {
 
 #After testing your changes I find there are more permissions I am missing.  Please add also:
 #```
-#es:GetCompatibleElasticsearchVersions
 #es:ListVersions
-#es:ListElastisearchVersions
+#es:StartServiceSoftwareUpdate
+#es:CancelServiceSoftwareUpdate
+#es:DescribeDomainChangeProgress
+#es:GetUpgradeHistory
+#es:GetUpgradeStatus
 #```
 
+#es:ListElastisearchVersions
+#es:StartElasticsearchServiceSoftwareUpdate
 
 
 
