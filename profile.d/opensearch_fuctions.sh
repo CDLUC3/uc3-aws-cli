@@ -10,6 +10,16 @@ os-domain-show() {
     $AWSBIN opensearch describe-domain --domain-name $NAME
 }
 
+os-domain-health() {
+    NAME=$1
+    $AWSBIN opensearch describe-domain-health --domain-name $NAME
+}
+
+os-domain-nodes() {
+    NAME=$1
+    $AWSBIN opensearch describe-domain-nodes --domain-name $NAME
+}
+
 os-domain-show-arn() {
     NAME=$1
     $AWSBIN opensearch describe-domain --domain-name $NAME | yq -r .DomainStatus.ARN
@@ -26,17 +36,12 @@ os-domain-show-config() {
     $AWSBIN opensearch describe-domain-config --domain-name $NAME
 }
 
-os-domain-health() {
+os-domain-software-update-status() {
     NAME=$1
-    $AWSBIN opensearch describe-domain-health --domain-name $NAME
+    $AWSBIN opensearch describe-domain --domain-name $NAME | yq -ry .DomainStatus.ServiceSoftwareOptions
 }
 
-os-domain-nodes() {
-    NAME=$1
-    $AWSBIN opensearch describe-domain-nodes --domain-name $NAME
-}
-
-os-domain-software-update() {
+os-domain-software-update-exec() {
     NAME=$1
     $AWSBIN opensearch start-service-software-update --domain-name $NAME
 }
