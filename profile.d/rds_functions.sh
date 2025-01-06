@@ -1,5 +1,5 @@
 rds-db-list() {
-  $AWSBIN rds  describe-db-instances | jq -r '.DBInstances[].DBInstanceIdentifier'
+  $AWSBIN rds  describe-db-instances | yq -r '.DBInstances[].DBInstanceIdentifier'
 }
 
 rds-db-show() {
@@ -9,12 +9,12 @@ rds-db-show() {
 
 rds-db-show-arn() {
   DB_NAME=$1
-  $AWSBIN rds describe-db-instances --db-instance-identifier $DB_NAME | jq -r '.DBInstances[].DBInstanceArn'
+  $AWSBIN rds describe-db-instances --db-instance-identifier $DB_NAME | yq -r '.DBInstances[].DBInstanceArn'
 }
 
 rds-db-show-fqdn() {
   DB_NAME=$1
-  $AWSBIN rds describe-db-instances --db-instance-identifier $DB_NAME | jq -r '.DBInstances[].Endpoint.Address'
+  $AWSBIN rds describe-db-instances --db-instance-identifier $DB_NAME | yq -r '.DBInstances[].Endpoint.Address'
 }
 
 rds-db-show-tags() {
