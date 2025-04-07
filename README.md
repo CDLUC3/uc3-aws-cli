@@ -25,8 +25,11 @@ This script creates and installs to the following directories:
 
 In order to source the aws shell functions,  Add the following to your ~/.bashrc:
 
-    if [ -d ~/.profile.d ]; then
-      . ~/.profile.d/*
+    # Gather profile snippets - mostly my awscli functions
+    if [ -d $HOME/.profile.d ]; then
+      for file in $(ls -1 $HOME/.profile.d); do
+        source ${HOME}/.profile.d/${file}
+      done
     fi
 
 ## Installation Prerequisites
