@@ -3,7 +3,7 @@
 # Lambda query functions
 
 lambda-function-list() {
-    $AWSBIN lambda list-functions | jq -r .Functions[].FunctionName
+    $AWSBIN lambda list-functions | yq -r .Functions[].FunctionName
 }
 
 lambda-function-show() {
