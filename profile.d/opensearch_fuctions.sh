@@ -61,3 +61,12 @@ aoss-security-config-show() {
 }
 
 
+aoss-collection-list() {
+    $AWSBIN opensearchserverless list-collections | yq -r '.collectionSummaries[].name'
+}
+
+aoss-collection-show() {
+    NAME=$1
+    $AWSBIN opensearchserverless batch-get-collection --names $NAME
+}
+
