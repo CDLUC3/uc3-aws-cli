@@ -70,3 +70,8 @@ aoss-collection-show() {
     $AWSBIN opensearchserverless batch-get-collection --names $NAME
 }
 
+aoss-collection-show-endpoint() {
+    NAME=$1
+    $AWSBIN opensearchserverless batch-get-collection --names $NAME | yq -r '.collectionDetails[].collectionEndpoint'
+}
+
