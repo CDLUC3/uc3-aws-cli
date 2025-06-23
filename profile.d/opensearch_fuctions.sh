@@ -75,3 +75,17 @@ aoss-collection-show-endpoint() {
     $AWSBIN opensearchserverless batch-get-collection --names $NAME | yq -r '.collectionDetails[].collectionEndpoint'
 }
 
+osis-pipeline-list () {
+    $AWSBIN osis list-pipelines | yq -r '.Pipelines[].PipelineName'
+}
+
+osis-pipeline-show () {
+    NAME=$1
+    $AWSBIN osis get-pipeline --pipeline-name $NAME #| yq -r '.Pipelines[].PipelineName'
+}
+
+osis-blueprint-list () {
+    $AWSBIN osis list-pipeline-blueprints | yq -r '.Blueprints[].BlueprintName'
+    # aws osis get-pipeline-blueprint --blueprint-name AWS-ElbAccessLogS3Pipeline
+}
+
