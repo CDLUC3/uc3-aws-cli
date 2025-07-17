@@ -38,6 +38,7 @@ cfn-stack-drift() {
 }
 
 
+
 # These will effect change
 #
 #cfn-stack-update() {
@@ -55,6 +56,11 @@ cfn-stack-delete() {
 
 cfn-stack-create() {
    $AWSBIN cloudformation create-stack --stack-name $1 --template-body file://$2 --capabilities CAPABILITY_NAMED_IAM
+}
+
+# > aws cloudformation continue-update-rollback --stack-name dmp-tool-dev-ecs-apollo --resources-to-skip EcsService
+cfn-stack-rollback() {
+   $AWSBIN cloudformation continue-update-rollback --stack-name $1
 }
 
 
