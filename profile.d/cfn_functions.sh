@@ -37,7 +37,22 @@ cfn-stack-drift() {
     $AWSBIN cloudformation describe-stack-resource-drifts --stack-name $1
 }
 
+cfn-changeset-list() {
+    STACK_NAME=$1
+    $AWSBIN cloudformation list-change-sets --stack-name $STACK_NAME
+}
 
+cfn-changeset-show() {
+    STACK_NAME=$1
+    CHANGESET_NAME=$2
+    $AWSBIN cloudformation describe-change-set --stack-name $STACK_NAME --change-set-name $CHANGESET_NAME
+}
+
+cfn-changeset-execute() {
+    STACK_NAME=$1
+    CHANGESET_NAME=$2
+    $AWSBIN cloudformation execute-change-set --stack-name $STACK_NAME --change-set-name $CHANGESET_NAME
+}
 
 # These will effect change
 #
