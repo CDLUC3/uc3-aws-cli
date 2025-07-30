@@ -74,7 +74,7 @@ ecs-service-update() {
   SERVICE_NAME=$1
   SERVICE_ARN=$(ecs-service-show-arn $SERVICE_NAME)
   CLUSTER_NAME=$(echo $SERVICE_ARN | awk -F '/' '{print $2}')
-  $AWSBIN ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment  | yq -ry 'del(.services[].events)'
+  $AWSBIN ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment
 }
 
 ecs-taskdef-for-service-show-arn() {
@@ -94,5 +94,26 @@ ecs-taskdef-for-service-show() {
 }
 
 # agould@localhost:~/git/github/cdluc3/uc3-aws-cli/profile.d> aws ecs list-tasks --cluster dmp-tool-dev-ecs-cluster-Fargate --service-name dmp-tool-dev-ecs-apollo
+ecs-task-list-for-service() {
+  SERVICE_NAME=$1
+  SERVICE_ARN=$(ecs-service-show-arn $SERVICE_NAME)
+  CLUSTER_NAME=$(echo $SERVICE_ARN | awk -F '/' '{print $2}')
+  $AWSBIN ecs list-tasks --cluster $CLUSTER_NAME --service-name $SERVICE_NAME | yq -r '.taskArns[]'
+}
 
-# agould@localhost:~/git/github/cdluc3/uc3-aws-cli/profile.d> aws ecs describe-tasks --cluster dmp-tool-dev-ecs-cluster-Fargate --tasks arn:aws:ecs:us-west-2:671846987296:task/dmp-tool-dev-ecs-cluster-Fargate/250cc45a0bef4f0cbc7c078eefd69b19| json2yaml.py |less
+ecs-task-list-for-cluster() {
+  CLUSTER_NAME=$1
+  $AWSBIN ecs list-tasks --cluster $CLUSTER_NAME | yq -r '.taskArns[]'
+}
+
+# agould@localhost:~/git/github/cdluc3/uc3-aws-cli/profile.d> aws ecs describe-tasks --cluster dmp-tool-dev-ecs-cluster-Fargate --tasks arn:aws:ecs:us-west-2:671846987296:task/dmp-tool-dev-ecs-cluster-Fargate/dc57b0dc02f2465087757bf002213f1d| json2yaml.py |less
+ecs-task-show() {
+  #if [ $# -nq 2 ]; then
+  if [ "$#" != 2 ]; then
+    echo "Usage: ecs-task-show <cluster name> <task arn>"
+  else  
+    CLUSTER_NAME=$1
+    TASK_ARN=$2
+    $AWSBIN ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASK_ARN
+  fi
+}
