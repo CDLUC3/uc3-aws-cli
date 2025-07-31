@@ -14,6 +14,10 @@ cfn-stack-show() {
     $AWSBIN cloudformation describe-stack-resources --stack-name $1 | yq -r '.StackResources[] | .LogicalResourceId, .ResourceType, ""'
 }
 
+cfn-stack-outputs() {
+    $AWSBIN cloudformation describe-stacks --stack-name $1 | yq -ry '.Stacks[].Outputs'
+}
+
 cfn-stack-resources() {
     aws cloudformation describe-stack-resources --stack-name $1 | \
         yq -ry '.StackResources[]' | \
