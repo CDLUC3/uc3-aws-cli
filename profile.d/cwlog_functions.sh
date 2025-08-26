@@ -2,14 +2,17 @@
 
 cwlog-lg-list() {
     response=$(aws logs list-log-groups)
-    loggroups=$(echo "$response" | jq -r '.logGroups[]')
+    loggroups=$(echo "$response" | jq -r '.logGroups[].logGroupName')
     nexttoken=$(echo "$response" | jq -r '.nextToken')
-    while [ ! -n $nexttoken ]; do
+    while [ "$nexttoken" != "null" ]; do
         response=$(aws logs list-log-groups --next-token $nexttoken)
-        loggroups=${loggroups}$(echo "$response" | jq -r '.logGroups[]')
+        loggroups="${loggroups} $(echo "$response" | jq -r '.logGroups[].logGroupName')"
         nexttoken=$(echo "$response" | jq -r '.nextToken')
     done
-    echo $loggroups | jq -r '.logGroupName' | sort
+    loggroups=$(echo $loggroups | sort)
+    for lg in $loggroups; do
+	echo $lg
+    done
 }
 
 cwlog-lg-show() {
@@ -29,14 +32,14 @@ cwlog-ls-show() {
     $AWSBIN logs describe-log-streams --log-group-name $LG_NAME --log-stream-name-prefix $LS_NAME
 }
 
-cwlog-ls-latest-show() {
+cwlog-ls-show-latest() {
     LG_NAME=$1
     $AWSBIN logs describe-log-streams --log-group-name $LG_NAME --order-by LastEventTime --descending \
        | yq -ry '.logStreams[0]'
 
 }
 
-cwlog-ls-latest-show-name() {
+cwlog-ls-list-latest() {
     LG_NAME=$1
     cwlog-ls-latest-show $LG_NAME | yq -r '.logStreamName'
 }
@@ -45,14 +48,14 @@ cwlog-ls-latest-show-name() {
 cwlog-events-get() {
     LG_NAME=$1
     LS_NAME=$2
-    $AWSBIN logs get-log-events --log-group-name $LG_NAME --log-stream-name $LS_NAME --limit 10
+    aws logs get-log-events --log-group-name $LG_NAME --log-stream-name $LS_NAME --limit 10
     #$AWSBIN logs get-log-events --log-group-name $LG_NAME --log-stream-name $LS_NAME --limit 10
 }
 
 cwlog-events-get-latest() {
     LG_NAME=$1
-    LS_NAME=$(cwlog-ls-latest-show-name $LG_NAME)
-    $AWSBIN logs get-log-events --log-group-name $LG_NAME --log-stream-name $LS_NAME --limit 10
+    LS_NAME=$(cwlog-ls-list-latest $LG_NAME)
+    aws logs get-log-events --log-group-name $LG_NAME --log-stream-name $LS_NAME --limit 10
 }
 
 
