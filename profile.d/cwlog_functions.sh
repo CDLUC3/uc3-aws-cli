@@ -59,6 +59,9 @@ cwlog-events-get-latest() {
 }
 
 
+# aws logs describe-subscription-filters  --log-group-name
+
+
 ## These commands alter resources
 
 cwlog-lg-create() {
@@ -84,7 +87,13 @@ cwlog-events-put() {
     $AWSBIN logs put-log-events --log-group-name $LG_NAME --log-events file://${EVENTS_FILE} --log-stream-name $LS_NAME
 }
 
-
+# usage:
+# cwlog-lg-create /test/ashley/kfd2oass
+# cwlog-ls-create /test/ashley/kfd2oass stream00
+# ~/cdl/ops/opensearch/fluentbit/pipeline_for_cloudwatch_logs> bin/generate_log_data.py 10 | tee data/generated_log_data.json
+# cwlog-events-put /test/ashley/kfd2oass stream00 ~/cdl/ops/opensearch/fluentbit/pipeline_for_cloudwatch_logs/data/generated_log_data.json 
+#
+# 
 
 ########################################
 # Notes
