@@ -9,10 +9,8 @@ cwlog-lg-list() {
         loggroups="${loggroups} $(echo "$response" | jq -r '.logGroups[].logGroupName')"
         nexttoken=$(echo "$response" | jq -r '.nextToken')
     done
-    loggroups=$(echo $loggroups | sort)
-    for lg in $loggroups; do
-	echo $lg
-    done
+    # convert spaces into end-of-line and sort
+    echo "${loggroups// /$'\n'}" | sort
 }
 
 cwlog-lg-show() {
