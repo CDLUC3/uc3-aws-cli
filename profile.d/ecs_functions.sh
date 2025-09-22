@@ -78,6 +78,10 @@ ecs-service-update() {
   fi
 }
 
+# aws ecs list-task-definitions | jq -r .taskDefinitionArns[] | awk -F : '{print $6}' | awk -F / '{print $2}' | sort -u
+# aws ecs list-task-definitions --family-prefix uc3-ops-ecs-dev-service-logstash-logstash
+# aws ecs describe-task-definition --task-definition uc3-ops-ecs-dev-service-logstash-logstash
+
 ecs-taskdef-show-arn() {
   if [ $# -ne 2 ]; then
     echo "Usage: ecs-taskdef-show-arn <cluster name> <service name>"
