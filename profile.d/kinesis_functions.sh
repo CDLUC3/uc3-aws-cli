@@ -1,4 +1,4 @@
-# AWS Kinesis query functions
+# AWS Kinesis and Firehose query functions
 
 kinesis-stream-list() {
   $AWSBIN kinesis list-streams | yq -r '.StreamNames[]'
@@ -43,3 +43,14 @@ kinesis-stream-show-records() {
 }
 
 # kinesis-stream-show-records uc3-ops-log-kinesis-stream-06798730 | json2yaml.py |less
+
+
+
+firehose-stream-list() {
+    $AWSBIN firehose list-delivery-streams | yq -r '.DeliveryStreamNames[]'
+}
+
+firehose-stream-show() {
+    STREAM_NAME=$1
+    $AWSBIN firehose describe-delivery-stream --delivery-stream-name $STREAM_NAME
+}

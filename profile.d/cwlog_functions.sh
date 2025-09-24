@@ -6,11 +6,13 @@ cwlog-lg-list() {
     nexttoken=$(echo "$response" | jq -r '.nextToken')
     while [ "$nexttoken" != "null" ]; do
         response=$(aws logs list-log-groups --next-token $nexttoken)
+        #new_loggroups=$(echo "$response" | jq -r '.logGroups[].logGroupName')
+        #loggroups="${loggroups}\n$new_loggroups"
         loggroups="${loggroups} $(echo "$response" | jq -r '.logGroups[].logGroupName')"
         nexttoken=$(echo "$response" | jq -r '.nextToken')
     done
-    # convert spaces into end-of-line and sort
     echo "${loggroups// /$'\n'}" | sort
+    #echo "$loggroups" | sort
 }
 
 cwlog-lg-show() {
@@ -83,6 +85,14 @@ cwlog-events-put() {
     LS_NAME=$2
     EVENTS_FILE=$3
     $AWSBIN logs put-log-events --log-group-name $LG_NAME --log-events file://${EVENTS_FILE} --log-stream-name $LS_NAME
+}
+
+cwlog-subfilter-list() {
+    # this is very slow
+    loggroups=$(cwlog-lg-list)
+    for lg in $loggroups; do
+        aws logs describe-subscription-filters --log-group-name $lg | jq -r .subscriptionFilters[]
+    done
 }
 
 # usage:
