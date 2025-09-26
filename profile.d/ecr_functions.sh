@@ -59,3 +59,23 @@ ecr-image-push() {
         docker push $ECR_ID/$ECR_REPO_NAME:$IMAGE_TAG
     fi
 }
+
+
+ecr-image-list-ids() {
+    ECR_REPO_NAME=$1
+    $AWSBIN ecr list-images --repository-name $ECR_REPO_NAME | yq -r '.imageIds[].imageDigest'
+}
+
+ecr-repository-delete-images() {
+    ECR_REPO_NAME=$1
+    IMAGE_IDS=$(ecr-image-list-ids $ECR_REPO_NAME)
+    for id in $IMAGE_IDS; do
+	$AWSBIN ecr batch-delete-image --repository-name $ECR_REPO_NAME --image-ids imageDigest=$id
+    done
+}
+
+ecr-repository-delete() {
+    ECR_REPO_NAME=$1
+    $AWSBIN ecr delete-repository --repository-name $ECR_REPO_NAME
+}
+
