@@ -20,6 +20,9 @@ iam-group-show() {
     $AWSBIN iam get-group --group-name $1
 }
 
+
+# Role Functions
+
 iam-role-list() {
     $AWSBIN iam list-roles | yq -r '.Roles[].RoleName'
 }
@@ -64,6 +67,14 @@ iam-role-show-policies() {
     iam-role-show-attached-policies $1
 }
 
+iam-role-delete() {
+    ROLE_NAME=$1
+    $AWSBIN iam delete-role --role-name $ROLE_NAME
+}
+
+
+# Policy Functions
+
 iam-policy-list() {
     $AWSBIN iam list-policies | yq -r '.Policies[].PolicyName' | sort
 }
@@ -84,4 +95,34 @@ iam-policy-show() {
     echo "$OUTPUT" | yq -ry '.Policy | {"PolicyName": .PolicyName, "Description": .Description}'
     $AWSBIN iam get-policy-version --policy-arn $ARN --version-id $VERSION | yq -ry '.PolicyVersion'
 }
+
+iam-policy-detach() {
+    # Currently only detaches from roles
+    if $(echo $1 | egrep ^arn.* 2>&1 > /dev/null); then
+        ARN=$1
+    else
+        ARN=$(iam-policy-show-arn $1)
+    fi
+    ROLES=$(aws iam list-entities-for-policy --policy-arn $ARN | jq -r '.PolicyRoles[].RoleName')
+    for role_name in $ROLES; do
+    echo $role_name
+        $AWSBIN iam detach-role-policy --role-name $role_name --policy-arn $ARN
+    done
+}
+
+iam-policy-delete() {
+    if $(echo $1 | egrep ^arn.* 2>&1 > /dev/null); then
+        ARN=$1
+    else
+        ARN=$(iam-policy-show-arn $1)
+    fi
+    POLICY_VERSIONS=$($AWSBIN iam list-policy-versions --policy-arn $ARN | yq -r '.Versions[].VersionId')
+    #echo "$POLICY_VERSIONS"
+    for version in $POLICY_VERSIONS; do
+	echo $version
+	$AWSBIN iam delete-policy-version --policy-arn $ARN --version-id $version
+    done
+    $AWSBIN iam delete-policy --policy-arn $ARN
+}
+
 

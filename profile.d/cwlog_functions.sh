@@ -91,9 +91,16 @@ cwlog-subfilter-list() {
     # this is very slow
     loggroups=$(cwlog-lg-list)
     for lg in $loggroups; do
-        aws logs describe-subscription-filters --log-group-name $lg | jq -r .subscriptionFilters[]
+        aws logs describe-subscription-filters --log-group-name $lg | jq -r '.subscriptionFilters[]'
     done
 }
+
+cwlog-subfilter-delete() {
+    LG_NAME=$1
+    FILTER_NAME=$2
+    aws logs delete-subscription-filter --log-group-name $LG_NAME --filter-name $FILTER_NAME
+}
+
 
 # usage:
 # cwlog-lg-create /test/ashley/kfd2oass
