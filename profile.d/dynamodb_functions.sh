@@ -10,4 +10,9 @@ dynamo_table_show() {
 }
 
 
-# aws dynamodb delete-table --table-name logstash
+dynamo_table_delete() {
+  TABLE_NAME=$1
+  $AWSBIN dynamodb delete-table --table-name $TABLE_NAME
+}
+
+
