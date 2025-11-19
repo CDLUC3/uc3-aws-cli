@@ -113,3 +113,43 @@ pyenv install 2.7.18
 pyenv versions
 pyenv global 2.7.18
 ```
+
+
+## Usage
+
+modify-waf-rules.py
+-------------------
+
+For good usage examples, see post in CDL UC3 confluence: 
+https://ucopedu.atlassian.net/wiki/spaces/UC3/pages/45446923/WAF
+
+```
+uc3-aws-cli> bin/modify-waf-rules.py --help
+Usage: modify-waf-rules.py [OPTIONS] WEBACL_NAME
+
+  Display or update webacl rules.
+
+  If no options are specified, current rules are dumped to standard out. Use
+  option '--output-file' to create a yaml file of current rules.  Edit  this
+  file with the updates you want to make.  This becomes your 'input-file'.
+
+  Rule updates are read from `--input-file`. By default your updates are
+  previewed only.  To make updates real, you must supply the '--execute' flag.
+
+  Examples:
+
+      modify_waf_rules.py mhaye-test-acl
+      modify_waf_rules.py mhaye-test-acl -o mhaye-test-acl.rules.yaml
+      vi mhaye-test-acl.rules.yaml
+      modify_waf_rules.py mhaye-test-acl -i mhaye-test-acl.rules.yaml
+      modify_waf_rules.py mhaye-test-acl -i mhaye-test-acl.rules.yaml --execute
+        
+
+Options:
+  -o, --output-file PATH  Filename in which to dump current webacl rules.
+  -i, --input-file PATH   Filename from which to read updated webacl rules.
+  -x, --execute           Set this flag to make updates real.
+  -h, --help              Show this message and exit.
+```
+
+
