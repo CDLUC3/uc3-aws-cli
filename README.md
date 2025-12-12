@@ -1,4 +1,5 @@
-Utility scripts for accessing AWS Client resources from UC3 servers.
+Utility scripts for accessing AWS Client resources from UC3 servers
+===================================================================
 
 ## Dependencies
 
