@@ -9,17 +9,32 @@ kinesis-stream-show() {
   STREAM_MODE=$($AWSBIN kinesis list-streams | yq -ry ".StreamSummaries[] | select(.StreamName == \"$STREAM_NAME\") | .StreamModeDetails")
   $AWSBIN kinesis describe-stream --stream-name $STREAM_NAME
   echo -e "  StreamModeDetails:\n    $STREAM_MODE"
+  $AWSBIN kinesis list-tags-for-stream --stream-name $STREAM_NAME
+}     
+  
+kinesis-stream-show-arn() {
+  STREAM_NAME=$1
+  $AWSBIN kinesis describe-stream --stream-name $STREAM_NAME | yq -r ".StreamDescription.StreamARN"
 }     
 
-
-kinesis-stream-summary-summary() {
+kinesis-stream-show-summary() {
   STREAM_NAME=$1
   $AWSBIN kinesis list-streams | yq -ry ".StreamSummaries[] | select(.StreamName == \"$STREAM_NAME\") | ."
+}
 
+kinesis-stream-show-consumers() {
+  STREAM_NAME=$1
+  STREAM_ARN=$(kinesis-stream-show-arn $STREAM_NAME)
+  $AWSBIN kinesis list-stream-consumers --stream-arn $STREAM_ARN
 }
 
 
-
+kinesis-stream-deregister-consumer() {
+  STREAM_NAME=$1
+  CONSUMER_NAME=$2
+  STREAM_ARN=$(kinesis-stream-show-arn $STREAM_NAME)
+  $AWSBIN kinesis deregister-stream-consumer --stream-arn $STREAM_ARN --consumer-name $CONSUMER_NAME
+}
 
 #aws kinesis get-shard-iterator --stream-name RootAccess --shard-id shardId-000000000000 --shard-iterator-type TRIM_HORIZON
 #
