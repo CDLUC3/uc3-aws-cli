@@ -1,11 +1,11 @@
 # Query functions for codepipeline, codebuild, and codestar-connections
 
 # codestar-connections
-costar-connection-list () {
+codestar-connection-list () {
   $AWSBIN codestar-connections list-connections | yq -r .Connections[].ConnectionName
 }
 
-costar-connection-show () {
+codestar-connection-show () {
   CONNECTION_NAME=$1
   CONNECTION_ARN=$($AWSBIN codestar-connections list-connections | \
 	  yq -r ".Connections[] | select(.ConnectionName == \"$CONNECTION_NAME\") | .ConnectionArn")
