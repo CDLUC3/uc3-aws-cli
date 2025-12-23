@@ -14,3 +14,6 @@ codestar-connection-show () {
   $AWSBIN codestar-connections list-tags-for-resource --resource-arn $CONNECTION_ARN
 }
 
+codebuild-project-list() {
+  $AWSBIN codebuild list-projects
+}
