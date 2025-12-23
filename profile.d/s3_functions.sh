@@ -49,6 +49,10 @@ s3-object-put() {
     aws s3 cp $localfile s3://${bucketpath%\/}/${localfile}
 }
 
+s3-object-delete() {
+    bucketpath=$1
+    aws s3 rm s3://${bucketpath}
+}
 
 
 # takes 2 args: bucketpath localfile 
