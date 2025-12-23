@@ -7,6 +7,11 @@ cfn-stack-list() {
     $AWSBIN cloudformation describe-stacks | yq -r '.Stacks[].StackName'
 }
 
+cfn-stack-grep() {
+    SUBSTRING=$1
+    $AWSBIN cloudformation describe-stacks | yq -r '.Stacks[].StackName' | grep $SUBSTRING
+}
+
 cfn-stack-show() {
     $AWSBIN cloudformation describe-stacks --stack-name $1 | yq -ry '.Stacks[]'
     echo
