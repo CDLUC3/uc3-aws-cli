@@ -77,6 +77,10 @@ cfn-stack-delete() {
    $AWSBIN cloudformation delete-stack --stack-name $1
 }
 
+cfn-stack-delete-force() {
+   $AWSBIN cloudformation delete-stack --stack-name $1 --deletion-mode FORCE_DELETE_STACK
+}
+
 
 cfn-stack-create() {
    $AWSBIN cloudformation create-stack --stack-name $1 --template-body file://$2 --capabilities CAPABILITY_NAMED_IAM
