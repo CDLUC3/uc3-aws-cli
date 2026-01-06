@@ -9,12 +9,28 @@ ec2-vpc-show() {
 }
 
 ec2-sg-list() {
-  $AWSBIN ec2 describe-security-groups | yq -r '.SecurityGroups[].GroupName'
+  $AWSBIN ec2 describe-security-groups | yq -r '.SecurityGroups[].GroupName' | sort
+}
+
+ec2-sg-list-long() {
+  #$AWSBIN ec2 describe-security-groups | yq -ry '.SecurityGroups[] | {.GroupName, .GroupId, .Description}' 
+  $AWSBIN ec2 describe-security-groups | yq -ry '.SecurityGroups[] | {"Name": .GroupName, "Id": .GroupId, "Desc": .Description}' 
 }
 
 ec2-sg-show() {
   SGNAME=$1
   $AWSBIN ec2 describe-security-groups --filters "Name=group-name,Values=$SGNAME" | yq -ry .
+}
+
+ec2-sg-show-id() {
+  SGNAME=$1
+  $AWSBIN ec2 describe-security-groups --filters "Name=group-name,Values=$SGNAME" | yq -r '.SecurityGroups[].GroupId'
+}
+
+ec2-sg-rules-show() {
+  SGNAME=$1
+  SG_ID=$(ec2-sg-show-id $SGNAME)
+  $AWSBIN ec2 describe-security-group-rules --filters "Name=group-id,Values=$SG_ID" | yq -ry .
 }
 
 ec2-instance-list() {
