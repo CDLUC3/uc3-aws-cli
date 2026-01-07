@@ -17,6 +17,7 @@ ecr-repository-list() {
 ecr-repository-show(){
     REPO_NAME=$1
     $AWSBIN ecr describe-repositories --repository-names $REPO_NAME | yq -ry '.repositories[]'
+    $AWSBIN ecr get-lifecycle-policy --repository-name $REPO_NAME | yq -ry '. | del(.registryId, .repositoryName)'
 }
 
 ecr-image-list(){
