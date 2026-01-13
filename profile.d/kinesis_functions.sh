@@ -28,6 +28,10 @@ kinesis-stream-show-consumers() {
   $AWSBIN kinesis list-stream-consumers --stream-arn $STREAM_ARN
 }
 
+kinesis-stream-show-first-shard-id() {
+  STREAM_NAME=$1
+  $AWSBIN kinesis describe-stream --stream-name $STREAM_NAME | yq -r ".StreamDescription.Shards[0].ShardId"
+}
 
 kinesis-stream-deregister-consumer() {
   STREAM_NAME=$1
@@ -44,9 +48,15 @@ kinesis-stream-deregister-consumer() {
 #echo -n "<Content of Data>" | base64 -d | zcat
 
 
+kinesis-stream-show-first-shard-id() {
+  STREAM_NAME=$1
+  $AWSBIN kinesis describe-stream --stream-name $STREAM_NAME | yq -r ".StreamDescription.Shards[0].ShardId"
+}
+
 kinesis-stream-show-shard-iterater() {
   STREAM_NAME=$1
-  $AWSBIN kinesis get-shard-iterator --stream-name $STREAM_NAME --shard-id shardId-000000000000 --shard-iterator-type TRIM_HORIZON | yq -r '.ShardIterator'
+  SHARD_ID=$(kinesis-stream-show-first-shard-id $STREAM_NAME)
+  $AWSBIN kinesis get-shard-iterator --stream-name $STREAM_NAME --shard-id $SHARD_ID --shard-iterator-type TRIM_HORIZON | yq -r '.ShardIterator'
 }
 
 
@@ -54,7 +64,8 @@ kinesis-stream-show-records() {
   STREAM_NAME=$1
   SHARD_ITERATER=$(kinesis-stream-show-shard-iterater $STREAM_NAME)
   DATA_CONTENT=$($AWSBIN kinesis get-records --limit 10 --shard-iterator "$SHARD_ITERATER" | yq -r '.Records[].Data')
-  echo -n "$DATA_CONTENT" | base64 -d | zcat
+  #echo -n "$DATA_CONTENT" | base64 -d | zcat
+  echo -n "$DATA_CONTENT"
 }
 
 # kinesis-stream-show-records uc3-ops-log-kinesis-stream-06798730 | json2yaml.py |less
