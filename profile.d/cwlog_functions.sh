@@ -95,6 +95,13 @@ cwlog-subfilter-list() {
     done
 }
 
+cwlog-subfilter-show() {
+    # this is very slow
+    LG_NAME=$1
+    #aws logs describe-subscription-filters --log-group-name $LG_NAME | jq -r '.subscriptionFilters[]'
+    $AWSBIN logs describe-subscription-filters --log-group-name $LG_NAME
+}
+
 cwlog-subfilter-delete() {
     LG_NAME=$1
     FILTER_NAME=$2
