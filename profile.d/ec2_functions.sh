@@ -8,6 +8,21 @@ ec2-vpc-show() {
   $AWSBIN ec2 describe-vpcs  --vpc-id $1 | yq -ry .
 }
 
+ec2-vpc-endpoint-list() {
+  $AWSBIN ec2 describe-vpc-endpoints | yq -r '.VpcEndpoints[].Tags[] | select(.Key == "Name") | .Value'
+}
+
+ec2-vpc-endpoint-show() {
+  SERVICE_NAME=$1
+  $AWSBIN ec2 describe-vpc-endpoints --filters "Name=tag:Name,Values=$SERVICE_NAME"
+}
+
+ec2-vpc-endpoint-delete() {
+  SERVICE_NAME=$1
+  VPC_ENDPOINT_ID=$(ec2-vpc-endpoint-show $SERVICE_NAME | yq -r '.VpcEndpoints[].VpcEndpointId')
+  $AWSBIN ec2 delete-vpc-endpoints --vpc-endpoint-ids $VPC_ENDPOINT_ID
+}
+
 ec2-sg-list() {
   $AWSBIN ec2 describe-security-groups | yq -r '.SecurityGroups[].GroupName' | sort
 }
