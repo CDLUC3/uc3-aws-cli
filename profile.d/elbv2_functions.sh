@@ -193,6 +193,16 @@ elb-tg-register() {
     aws elbv2 register-targets --region $AWS_DEFAULT_REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-show-id $TARGET)
 }
 
+elb-tg-register-ip() {
+    TG=$1
+    TARGET_IP=$2
+    if [ -z "$AWS_DEFAULT_REGION" ]; then
+        echo "AWS_DEFAULT_REGION not defined"
+        return
+    fi
+    aws elbv2 register-targets --region $AWS_DEFAULT_REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$TARGET_IP
+}
+
 elb-tg-deregister() {
     TG=$1
     TARGET=$2
@@ -201,6 +211,16 @@ elb-tg-deregister() {
         return
     fi
     aws elbv2 deregister-targets --region $AWS_DEFAULT_REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$(ec2-instance-show-id $TARGET)
+}
+
+elb-tg-deregister-ip() {
+    TG=$1
+    TARGET_IP=$2
+    if [ -z "$AWS_DEFAULT_REGION" ]; then
+        echo "AWS_DEFAULT_REGION not defined"
+        return
+    fi
+    aws elbv2 deregister-targets --region $AWS_DEFAULT_REGION --target-group-arn $(elb-tg-show-arn $TG) --targets Id=$TARGET_IP
 }
 
 
