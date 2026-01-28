@@ -81,10 +81,50 @@ ecs-service-update() {
 # aws ecs list-task-definitions | jq -r .taskDefinitionArns[] | awk -F : '{print $6}' | awk -F / '{print $2}' | sort -u
 # aws ecs list-task-definitions --family-prefix uc3-ops-ecs-dev-service-logstash-logstash
 # aws ecs describe-task-definition --task-definition uc3-ops-ecs-dev-service-logstash-logstash
+#
 
-ecs-taskdef-show-arn() {
+ecs-taskdef-list() {
+    # must match a ecs family name exactly
+    FAMILY=$1
+    if [ -n "$FAMILY" ]; then
+        PREFIX_QUERY="--family-prefix $FAMILY"
+    else
+        PREFIX_QUERY=""
+    fi
+
+    response=$(aws ecs list-task-definitions $PREFIX_QUERY)
+    taskdefinitions=$(echo "$response" | jq -r '.taskDefinitionArns[]')
+    nexttoken=$(echo "$response" | jq -r '.nextToken')
+    #echo $nexttoken
+    while [ "$nexttoken" != "null" ]; do
+        response=$(aws ecs list-task-definitions --starting-token $nexttoken $PREFIX_QUERY)
+        taskdefinitions="${taskdefinitions} $(echo "$response" | jq -r '.taskDefinitionArns[]')"
+        nexttoken=$(echo "$response" | jq -r '.nextToken')
+    done
+    # convert spaces into end-of-line and sort
+    echo "${taskdefinitions// /$'\n'}"
+}
+
+ecs-taskdef-show() {
+  # can also be a taskdef family
+  TASKDEF_ARN=$1
+  $AWSBIN ecs describe-task-definition --task-definition $TASKDEF_ARN
+}
+
+ecs-taskdef-family-list() {
+    # must match beginning of a ecs family name
+    FAMILY_PREFIX=$1
+    if [ -n "$FAMILY_PREFIX" ]; then
+        PREFIX_QUERY="--family-prefix $FAMILY_PREFIX"
+    else
+        PREFIX_QUERY=""
+    fi
+    $AWSBIN ecs list-task-definition-families $PREFIX_QUERY | yq -r '.families[]'
+}
+
+ecs-taskdef-for-service-list() {
   if [ $# -ne 2 ]; then
-    echo "Usage: ecs-taskdef-show-arn <cluster name> <service name>"
+    echo "Usage: ecs-taskdef-for-service-list <cluster name> <service name>"
   else  
     CLUSTER_NAME=$1
     SERVICE_NAME=$2
@@ -92,13 +132,13 @@ ecs-taskdef-show-arn() {
   fi
 }
 
-ecs-taskdef-show() {
+ecs-taskdef-for-service-show() {
   if [ $# -ne 2 ]; then
-    echo "Usage: ecs-taskdef-show <cluster name> <service name>"
+    echo "Usage: ecs-taskdef-for-service-show <cluster name> <service name>"
   else  
     CLUSTER_NAME=$1
     SERVICE_NAME=$2
-    $AWSBIN ecs describe-task-definition --task-definition $(ecs-taskdef-for-service-show-arn $CLUSTER_NAME $SERVICE_NAME)
+    $AWSBIN ecs describe-task-definition --task-definition $(ecs-taskdef-for-service-list $CLUSTER_NAME $SERVICE_NAME)
   fi
 }
 
@@ -109,16 +149,30 @@ ecs-task-list() {
     $AWSBIN ecs list-tasks --cluster $CLUSTER_NAME --service-name $SERVICE_NAME | yq -r '.taskArns[]'
   elif [ $# -eq 1 ]; then
     CLUSTER_NAME=$1
-    $AWSBIN ecs list-tasks --cluster $CLUSTER_NAME | yq -r '.taskArns[]'
+    TASKARNS=$($AWSBIN ecs list-tasks --cluster $CLUSTER_NAME | yq -r '.taskArns[]')
+    $AWSBIN ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASKARNS | yq -ry '.tasks[] | {"TaskArn": .taskArn, "TaskDef": .taskDefinitionArn, "Group": .group}'
+    #$AWSBIN ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASKARNS | yq -ry .
+
   else
-    echo "Usage: ecs-task-list <cluster name> <service name>"
+    echo "Usage: ecs-task-list <cluster name> [service name]"
+  fi
+}
+
+ecs-task-show() {
+  if [ $# -ne 2 ]; then
+    echo "Usage: ecs-task-show <cluster name> <task arn>"
+  else  
+    CLUSTER_NAME=$1
+    TASK_ARN=$2
+    $AWSBIN ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASK_ARN
   fi
 }
 
 # agould@localhost:~/git/github/cdluc3/uc3-aws-cli/profile.d> aws ecs describe-tasks --cluster dmp-tool-dev-ecs-cluster-Fargate --tasks arn:aws:ecs:us-west-2:671846987296:task/dmp-tool-dev-ecs-cluster-Fargate/dc57b0dc02f2465087757bf002213f1d| json2yaml.py |less
-ecs-task-show() {
+
+ecs-task-for-service-show() {
   if [ $# -ne 2 ]; then
-    echo "Usage: ecs-taskdef-show <cluster name> <service name>"
+    echo "Usage: ecs-task-show <cluster name> <service name>"
     #echo "Usage: ecs-task-show <cluster name> <task arn>"
   else  
     CLUSTER_NAME=$1
