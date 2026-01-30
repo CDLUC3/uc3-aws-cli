@@ -182,3 +182,55 @@ ecs-task-for-service-show() {
   fi
 }
 
+ecs-task-stop() {
+  CLUSTER_NAME=$1
+  TASK_ARN=$2
+  $AWSBIN ecs stop-task --cluster $CLUSTER_NAME --task $TASK_ARN
+}
+
+ecs-task-run() {
+  JSON_FILE=$1
+  $AWSBIN ecs run-task --cli-input-json file://${JSON_FILE}
+}
+
+# run task using cli-input-json file
+#
+# > ec2-sg-show-id dmp-tool-dev-ecs-cluster-SecGrp
+# sg-06e8a7ea8e04386a9
+# 
+# > ec2-subnet-show cdl-uc3-dev-public-2a | grep SubnetId
+#    SubnetId: subnet-0d183c364b7083d8a
+#
+# CLUSTER=dmp-tool-dev-ecs-cluster-Fargate
+# TASKDEF=dmp-tool-dev-ecs-certbot-certbot:1
+# SECGROUP=sg-06e8a7ea8e04386a9
+# SUBNETS=subnet-0d183c364b7083d8a
+#
+# aws ecs run-task --cli-input-json file://tmp/ebs.json
+#
+# Contents of tmp/ebs.json:
+# 
+# {
+#    "cluster": "dmp-tool-dev-ecs-cluster-Fargate",
+#    "taskDefinition": "dmp-tool-dev-ecs-certbot-certbot:1",
+#    "launchType": "FARGATE",
+#    "networkConfiguration":{
+#         "awsvpcConfiguration":{
+#             "assignPublicIp": "DISABLED",
+#             "securityGroups": ["sg-06e8a7ea8e04386a9"],
+#             "subnets":["subnet-0d183c364b7083d8a"]
+#         }
+#     }
+# }
+
+# Register task in alb targetgroup:
+# elb-tg-register-ip dmp-tool-dev-alb-Certbot-TG 10.66.15.95
+#
+# session dmp-tool-dev-ecs-cluster-Fargate/certbot-ssm
+#
+# ecs-task-list dmp-tool-dev-ecs-cluster-Fargate | grep -C2 certbot
+# ---
+# TaskArn: arn:aws:ecs:us-west-2:671846987296:task/dmp-tool-dev-ecs-cluster-Fargate/2f0acab3e26841fcaaadb24220bc8852
+# 
+# elb-tg-deregister-ip dmp-tool-dev-alb-Certbot-TG 10.66.15.95
+#
