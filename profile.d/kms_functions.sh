@@ -4,9 +4,28 @@ kms-alias-list () {
   $AWSBIN kms list-aliases | yq -r '.Aliases[].AliasName'
 }
 
+kms-alias-show-keyid () {
+  ALIAS=$1
+  $AWSBIN kms list-aliases | yq -r ".Aliases[] | select(.AliasName == \"$ALIAS\") | .TargetKeyId"
+}
+
 kms-key-show () {
-  KEYID=$1
+  ALIAS=$1
+  KEYID=$(kms-alias-show-keyid $ALIAS)
   $AWSBIN kms describe-key --key-id $KEYID
+}
+
+kms-key-policy-show () {
+  ALIAS=$1
+  KEYID=$(kms-alias-show-keyid $ALIAS)
+  POLICY_NAMES=$($AWSBIN kms list-key-policies --key-id $KEYID | yq -r '.PolicyNames[]')
+  for name in $POLICY_NAMES; do
+      response=$(aws kms get-key-policy --key-id $KEYID --policy-name $name)
+      #echo $response | yq -ry '.PolicyName'
+      echo -n "PolicyName: "
+      echo $response | jq -r '.PolicyName'
+      echo $response | jq -r '.Policy' | json2yaml
+  done
 }
 
 kms-key-list-ids () {
