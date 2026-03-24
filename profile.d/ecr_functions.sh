@@ -67,6 +67,12 @@ ecr-image-list-ids() {
     $AWSBIN ecr list-images --repository-name $ECR_REPO_NAME | yq -r '.imageIds[].imageDigest'
 }
 
+ecr-image-delete() {
+    ECR_REPO_NAME=$1
+    IMAGE_ID=$2
+    $AWSBIN ecr batch-delete-image --repository-name $ECR_REPO_NAME --image-ids imageDigest=$IMAGE_ID
+}
+
 ecr-repository-delete-images() {
     ECR_REPO_NAME=$1
     IMAGE_IDS=$(ecr-image-list-ids $ECR_REPO_NAME)
