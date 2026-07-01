@@ -9,6 +9,11 @@ cwmetrics-alarm-show() {
   $AWSBIN cloudwatch describe-alarms --alarm-names $ALARM_NAME
 }
 
+cwmetrics-alarm-delete() {
+  ALARM_NAME=$1
+  $AWSBIN cloudwatch delete-alarms --alarm-names $ALARM_NAME
+}
+
 
 cwmetrics-namespace-list() {
 NAMESPACES="AWS/AOSS AWS/ApiGateway AWS/ApplicationELB AWS/Backup AWS/Bedrock-AgentCore AWS/CertificateManager AWS/Cognito AWS/Config AWS/DynamoDB AWS/EBS AWS/EC2 AWS/ECR AWS/ECS AWS/EFS AWS/ES AWS/ElastiCache AWS/Events AWS/Firehose AWS/HealthLake AWS/KMS AWS/Kinesis AWS/Lambda AWS/Logs AWS/Observability Admin AWS/PrivateLinkEndpoints AWS/RDS AWS/S3 AWS/SNS AWS/SQS AWS/SSM-RunCommand AWS/SecretsManager AWS/States AWS/Usage AWS/WAFV2 AWS/X-Ray CWAgent ECS/ContainerInsights merritt"
