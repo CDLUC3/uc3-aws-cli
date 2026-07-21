@@ -87,5 +87,8 @@ s3-bucket-pull() {
     aws s3 sync s3://${bucketpath%\/}/ ${localpath%\/}/
 }
 
-
+s3-bucket-show-policy() {
+    BUCKET_NAME=$1
+    $AWSBIN s3api get-bucket-policy --bucket $BUCKET_NAME | yq -ry .Policy
+}
 
