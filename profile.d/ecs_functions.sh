@@ -64,7 +64,7 @@ ecs-service-show-events() {
   else  
     CLUSTER_NAME=$1
     SERVICE_NAME=$2
-    $AWSBIN ecs describe-services --cluster $CLUSTER_NAME --service $SERVICE_NAME  | yq -ry '.services[].events'
+    $AWSBIN ecs describe-services --cluster $CLUSTER_NAME --service $SERVICE_NAME  | yq -ry '.services[].events' | head -20
   fi
 }
 
@@ -172,13 +172,36 @@ ecs-task-show() {
 
 ecs-task-for-service-show() {
   if [ $# -ne 2 ]; then
-    echo "Usage: ecs-task-show <cluster name> <service name>"
-    #echo "Usage: ecs-task-show <cluster name> <task arn>"
+    echo "Usage: ecs-task-for-service-show <cluster name> <service name>"
   else  
     CLUSTER_NAME=$1
     SERVICE_NAME=$2
     TASK_ARN=$(ecs-task-list $CLUSTER_NAME $SERVICE_NAME)
     $AWSBIN ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASK_ARN
+  fi
+}
+
+ecs-task-for-service-show-image() {
+  if [ $# -ne 2 ]; then
+    echo "Usage: ecs-task-for-service-show-image <cluster name> <service name>"
+  else
+    CLUSTER_NAME=$1
+    SERVICE_NAME=$2
+    TASK_ARN=$(ecs-task-list $CLUSTER_NAME $SERVICE_NAME)
+    $AWSBIN ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASK_ARN | \
+	    yq -ry '.tasks[].containers[] | {"image": .image, "digest": .imageDigest}'
+  fi
+}
+
+ecs-task-for-service-show-health() {
+  if [ $# -ne 2 ]; then
+    echo "Usage: ecs-task-for-service-show-health <cluster name> <service name>"
+  else
+    CLUSTER_NAME=$1
+    SERVICE_NAME=$2
+    TASK_ARN=$(ecs-task-list $CLUSTER_NAME $SERVICE_NAME)
+    $AWSBIN ecs describe-tasks --cluster $CLUSTER_NAME --tasks $TASK_ARN | \
+	    yq -ry '.tasks[].containers[] | {"name": .name, "healthStatus": .healthStatus, "lastStatus": .lastStatus}'
   fi
 }
 
