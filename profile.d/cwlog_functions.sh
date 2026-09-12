@@ -108,7 +108,30 @@ cwlog-subfilter-delete() {
     aws logs delete-subscription-filter --log-group-name $LG_NAME --filter-name $FILTER_NAME
 }
 
+cwlog-delivery-list() {
+    $AWSBIN logs describe-deliveries
+}
 
+cwlog-delivery-source-list() {
+    $AWSBIN logs describe-delivery-sources
+}
+
+
+cwlog-delivery-destination-list() {
+    $AWSBIN logs describe-delivery-destinations
+}
+
+cwlog-delivery-show() {
+    ID=$1
+    $AWSBIN logs get-delivery --id $ID
+}
+
+
+
+
+
+
+###############################################################################################
 # usage:
 # cwlog-lg-create /test/ashley/kfd2oass
 # cwlog-ls-create /test/ashley/kfd2oass stream00

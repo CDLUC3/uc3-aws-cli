@@ -86,3 +86,22 @@ ecr-repository-delete() {
     $AWSBIN ecr delete-repository --repository-name $ECR_REPO_NAME
 }
 
+
+##############################################
+# Notes
+
+# See: https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-retag.html
+# 
+# ECR_REPO_NAME=ezid-n2t-dev-web-ecr
+# #OLD_TAG=v0.0.0-latest
+# #NEW_TAG=dev-latest
+# OLD_TAG=latest
+# #NEW_TAG=previous
+# NEW_TAG=dev-latest
+# MANIFEST=$(aws ecr batch-get-image --repository-name $ECR_REPO_NAME --image-ids imageTag=$OLD_TAG --output text --query 'images[].imageManifest')
+# #echo $MANIFEST | json2yaml
+# aws ecr put-image --repository-name $ECR_REPO_NAME --image-tag $NEW_TAG --image-manifest "$MANIFEST"
+
+
+
+
