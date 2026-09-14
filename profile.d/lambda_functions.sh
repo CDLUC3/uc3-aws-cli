@@ -31,3 +31,35 @@ lambda-function-show-config() {
 #    $AWSBIN lambda delete-function --function-name $1
 #}
 
+
+lambda-function-invoke () {
+
+    FUNCTION_NAME=$1
+    PAYLOAD_FILE=$2
+    RESPONSE_FILE=$(mktemp --suffix=.json)
+    echo $RESPONSE_FILE
+
+    $AWSBIN lambda invoke  --function-name $FUNCTION_NAME \
+      --invocation-type RequestResponse \
+      --cli-binary-format raw-in-base64-out \
+      --payload file://$PAYLOAD_FILE \
+      $RESPONSE_FILE
+    rm $RESPONSE_FILE
+
+}
+
+#agould@linux:~/tmp> cat lambda_payload.json
+#{
+#  "cluster": "ezid-common-dev-ecscluster",
+#  "service_name": "ezid-n2t-dev-web-ecs",
+#  "ssm_base_path": "/uc3/ezid/autodeploy",
+#  "environment": "dev"
+#}
+#agould@linux:~/tmp> lambda-function-invoke ezid-n2t-dev-web-autodeploy-EcsServiceRestart lambda_payload.json 
+#/tmp/tmp.IWTwQkNA3C.json
+#ExecutedVersion: $LATEST
+#StatusCode: 200
+
+
+
+
