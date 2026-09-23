@@ -1,10 +1,10 @@
 # query functions for AWS EventBridge resources
 
-scheduler-list-schedules() {
+scheduler-schedule-list() {
   $AWSBIN scheduler list-schedules | yq -r '.Schedules[].Name'
 }
 
-scheduler-show-schedule() {
+scheduler-schedule-show() {
   NAME=$1
   $AWSBIN scheduler get-schedule --name $NAME
 }

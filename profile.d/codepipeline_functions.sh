@@ -32,9 +32,14 @@ codepipeline-pipeline-show-state() {
   $AWSBIN codepipeline get-pipeline-state --name $PIPELINE_NAME
 }
 
-codepipeline-pipeline-execution-list() {
+codepipeline-pipeline-execution-list-all() {
   PIPELINE_NAME=$1
   $AWSBIN codepipeline list-pipeline-executions --pipeline-name $PIPELINE_NAME
+}
+
+codepipeline-pipeline-execution-list() {
+  PIPELINE_NAME=$1
+  $AWSBIN codepipeline list-pipeline-executions --pipeline-name $PIPELINE_NAME | yq -r '.pipelineExecutionSummaries[] | {"pipelineExecutionId": .pipelineExecutionId, "startTime": .startTime, "status": .status}'
 }
 
 codepipeline-pipeline-execution-start() {
