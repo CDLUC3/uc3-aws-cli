@@ -126,6 +126,11 @@ cwlog-delivery-show() {
     $AWSBIN logs get-delivery --id $ID
 }
 
+cwlog-delivery-delete() {
+    ID=$1
+    $AWSBIN logs delete-delivery --id $ID
+}
+
 
 
 
